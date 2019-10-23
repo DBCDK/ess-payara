@@ -5,7 +5,7 @@ if (env.BRANCH_NAME == 'master') {
             triggers: [
                 [
                     $class: 'jenkins.triggers.ReverseBuildTrigger',
-                    upstreamProjects: "../pg-queue/master, dbc-commons, Docker-postgres-bump-trigger, Docker-payara5-bump-trigger", threshold: hudson.model.Result.SUCCESS
+                    upstreamProjects: "Docker-payara5-bump-trigger", threshold: hudson.model.Result.SUCCESS
                 ]
     	    ]
         ]),
@@ -58,7 +58,7 @@ pipeline {
         stage("analysis") {
             steps {
                 sh """
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -pl !gui pmd:pmd pmd:cpd findbugs:findbugs
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo pmd:pmd pmd:cpd findbugs:findbugs
                 """
 
                 script {
@@ -123,18 +123,6 @@ pipeline {
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        stage("upload") {
-            steps {
-                script {
-                    if (env.BRANCH_NAME ==~ /master|trunk/) {
-                        sh """
-                            mvn -Dmaven.repo.local=\$WORKSPACE/.repo jar:jar deploy:deploy
-                        """
                     }
                 }
             }
