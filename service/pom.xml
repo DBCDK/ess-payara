@@ -13,6 +13,33 @@
   <artifactId>ess-payara-service</artifactId>
   <packaging>war</packaging>
 
+  <build>
+    <finalName>ess-payara-service</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.jvnet.jaxb2.maven2</groupId>
+        <artifactId>maven-jaxb2-plugin</artifactId>
+        <version>0.14.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <id>xjc</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <strict>false</strict>
+          <verbose>true</verbose>
+          <schemaDirectory>${basedir}/src/main/xsd</schemaDirectory>
+          <extension>true</extension>
+          <packageLevelAnnotations>false</packageLevelAnnotations>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -50,7 +77,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <finalName>ess-payara-service</finalName>
-  </build>
 </project>

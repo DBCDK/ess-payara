@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings
+        version="2.1"
+        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:annox="http://annox.dev.java.net"
+        jaxb:extensionBindingPrefixes="xjc annox">
+
+    <jaxb:bindings>
+        <jaxb:globalBindings>
+            <xjc:simple />
+            <xjc:javaType name="java.lang.Long" xmlType="xs:integer"
+                          adapter="dk.dbc.ws.LongAdapter" />
+            <xjc:javaType name="java.lang.Long" xmlType="xs:positiveInteger"
+                          adapter="dk.dbc.ws.UnsignedLongAdapter" />
+            <xjc:javaType name="java.lang.Long" xmlType="xs:nonNegativeInteger"
+                          adapter="dk.dbc.ws.UnsignedLongAdapter" />
+        </jaxb:globalBindings>
+    </jaxb:bindings>
+
+    <jaxb:bindings schemaLocation="diagnostic.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.diagnostic"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="facetedResults.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.facetedresults"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="scan.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.scan"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="searchResultAnalysis.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.searchresultanalysis"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="sruRequest.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.srurequest"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="sruResponse.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.sruresponse"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="xcql.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.sru.xcql"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+
+    <jaxb:bindings schemaLocation="openformat.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="dk.dbc.openformat"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+</jaxb:bindings>
