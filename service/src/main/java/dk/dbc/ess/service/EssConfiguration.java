@@ -30,8 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -41,9 +44,17 @@ import java.util.function.Function;
 
 public class EssConfiguration  {
     public EssConfiguration() {
+        env = System.getenv();
+    }
+
+    public EssConfiguration(String... params) {
+        this.env = Arrays.stream(params)
+                .map(s -> s.split("=", 2))
+                .collect(toMap(p -> p[0], p -> p[1]));
     }
 
     private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
+    private final Map<String, String> env;
 
     private String metaProxyUrl;
     private String openFormatUrl;
@@ -55,13 +66,13 @@ public class EssConfiguration  {
 
     public void loadProperties() {
         Properties props = findProperties("external-search-service");
-        metaProxyUrl = getValue(props, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
-        openFormatUrl = getValue(props, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
-        formats = getValue(props, "formats", "FORMATS", null, "No formats specified", s -> Arrays.asList(s.split(",")));
-        maxPageSize = getValue(props, "maxPageSize", "MAX_PAGE_SIZE", "500", "", Long::parseUnsignedLong);
-        bases = getValue(props, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
-        jerseyTimeout = getValue(props, "jerseyTimeout", "JERSEY_TIMEOUT", "60", "No jersey timeout specified", Long::parseUnsignedLong);
-        jerseyConnectionTimeout = getValue(props, "jerseyConnectionTimeout", "JERSEY_CONNECTION_TIMEOUT",
+        metaProxyUrl = getValue(props, env, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
+        openFormatUrl = getValue(props, env, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
+        formats = getValue(props, env, "formats", "FORMATS", "netpunkt_standard", "No formats specified", s -> Arrays.asList(s.split(",")));
+        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "500", "", Long::parseUnsignedLong);
+        bases = getValue(props, env, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
+        jerseyTimeout = getValue(props, env, "jerseyTimeout", "JERSEY_TIMEOUT", "60", "No jersey timeout specified", Long::parseUnsignedLong);
+        jerseyConnectionTimeout = getValue(props, env, "jerseyConnectionTimeout", "JERSEY_CONNECTION_TIMEOUT",
                 "300", "No jersey connection timeout specified", Long::parseUnsignedLong);
     }
 
@@ -73,14 +84,14 @@ public class EssConfiguration  {
     public long getJerseyTimeout() { return jerseyTimeout; }
     public long getJerseyConnectionTimeout() { return jerseyConnectionTimeout; }
 
-    private static <T> T getValue(Properties props, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
-        return mapper.apply(getValue(props, propertyName, envName, defaultValue, error));
+    private static <T> T getValue(Properties props, Map<String, String> env, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
+        return mapper.apply(getValue(props, env, propertyName, envName, defaultValue, error));
     }
 
-    private static String getValue(Properties props, String propName, String envName, String defaultValue, String error) {
+    private static String getValue(Properties props, Map<String, String> env, String propName, String envName, String defaultValue, String error) {
         String val = props.getProperty(propName);
         if (val == null) {
-            val = System.getenv(envName);
+            val = env.get(envName);
         }
         if (val == null) {
             val = defaultValue;

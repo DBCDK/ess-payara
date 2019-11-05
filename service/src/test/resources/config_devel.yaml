@@ -1,0 +1,35 @@
+
+settings:
+    metaProxyUrl: ${META_PROXY_URL}
+    openFormatUrl: ${OPEN_FORMAT_URL}
+    maxPageSize: 5
+    bases: libris,bibsys
+
+jerseyClient:
+  timeout: 60000ms
+  connectionTimeout: 500ms
+  timeToLive: 1h
+  cookiesEnabled: false
+  maxConnections: 1024
+  maxConnectionsPerRoute: 1024
+  keepAlive: 0ms
+  retries: 0
+  userAgent: ${APPLICATION_NAME:-unknown} (jersey-client/1.0)
+  minThreads: 1
+  maxThreads: 128
+  workQueueSize: 8
+  gzipEnabled: true
+  gzipEnabledForRequests: false
+  chunkedEncodingEnabled: true
+  
+
+server:
+#  softNofileLimit: 1000
+#  hardNofileLimit: 1000
+  rootPath: /api
+  applicationConnectors:
+    - type: http
+      port: 8010
+  adminConnectors:
+    - type: http
+      port: 8011

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{52} - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="dk.dbc" level="DEBUG" />
+    <logger name="dk.dbc.ess.service" level="TRACE" />
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

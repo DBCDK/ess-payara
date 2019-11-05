@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response xmlns="info:ESSv0">
+    <hits>5</hits>
+    <records>
+        <error>
+            <message>Internal Server Error</message>
+        </error>
+        <error>
+            <message>Internal Server Error</message>
+        </error>
+    </records>
+    <trackingId>T</trackingId>
+</response>

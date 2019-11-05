@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<of:formatResponse xmlns:of="http://oss.dbc.dk/ns/openformat" xmlns="http://oss.dbc.dk/ns/openformat">
+    <of:error>
+        An error of sorts
+    </of:error>
+</of:formatResponse>

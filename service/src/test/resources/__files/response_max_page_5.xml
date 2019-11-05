@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>5158</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+ <leader>01218cam a2200265 c 4500</leader>
+ <controlfield tag="001">990000662304702201</controlfield>
+ <controlfield tag="005">20060424084326.0</controlfield>
+ <controlfield tag="007">ta</controlfield>
+ <controlfield tag="008">060424s1996 xx#|||||||||||000|u|eng|d</controlfield>
+ <datafield tag="020" ind1=" " ind2=" ">
+ <subfield code="a">0801852439</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">000066230-47bibsys_network</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)000066230</subfield>
+ </datafield>
+ <datafield tag="040" ind1=" " ind2=" ">
+ <subfield code="a">NO-TrBIB</subfield>
+ <subfield code="b">nob</subfield>
+ <subfield code="e">katreg</subfield>
+ </datafield>
+ <datafield tag="245" ind1="0" ind2="4">
+ <subfield code="a">The theatre of images</subfield>
+ <subfield code="c">edited with introductory essays and a new afterword by Bonnie Marranca</subfield>
+ </datafield>
+ <datafield tag="260" ind1=" " ind2=" ">
+ <subfield code="a">Baltimore</subfield>
+ <subfield code="b">The Johns Hopkins University press</subfield>
+ <subfield code="c">c1996</subfield>
+ </datafield>
+ <datafield tag="300" ind1=" " ind2=" ">
+ <subfield code="a">XV, 168 s.</subfield>
+ <subfield code="b">ill.</subfield>
+ </datafield>
+ <datafield tag="505" ind1="0" ind2=" ">
+ <subfield code="a">Foreman, Richard / Pandering to the masses: a misrepresentation. Wilson, Robert / A letter for queen Victoria. Breuer, Lee / The red horse animation. Orig.utg.: c1977</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">Marranca, Bonnie</subfield>
+ <subfield code="0">(NO-TrBIB)90134941</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2="2">
+ <subfield code="a">Foreman, Richard</subfield>
+ <subfield code="0">(NO-TrBIB)90585460</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2="2">
+ <subfield code="a">Breuer, Lee</subfield>
+ <subfield code="0">(NO-TrBIB)90304943</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2="2">
+ <subfield code="a">Wilson, Robert,</subfield>
+ <subfield code="d">1941-</subfield>
+ <subfield code="0">(NO-TrBIB)97054809</subfield>
+ </datafield>
+ <datafield tag="856" ind1="4" ind2="2">
+ <subfield code="3">Beskrivelse fra forlaget (kort)</subfield>
+ <subfield code="u">http://content.bibsys.no/content/?type=descr_publ_brief&amp;isbn=0801852439</subfield>
+ </datafield>
+ <datafield tag="856" ind1="4" ind2="2">
+ <subfield code="3">Beskrivelse fra forlaget (lang)</subfield>
+ <subfield code="u">http://content.bibsys.no/content/?type=descr_publ_full&amp;isbn=0801852439</subfield>
+ </datafield>
+ <datafield tag="901" ind1=" " ind2=" ">
+ <subfield code="a">80</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_HIO</subfield>
+ <subfield code="6">990000662304702218</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+</record></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+ <leader>01568cam a2200445 c 4500</leader>
+ <controlfield tag="001">990000888384702201</controlfield>
+ <controlfield tag="005">20160622152400.0</controlfield>
+ <controlfield tag="007">ta</controlfield>
+ <controlfield tag="007">cr||||||||||||</controlfield>
+ <controlfield tag="008">110926s1999 no#||||j |||||000|1|nob| </controlfield>
+ <datafield tag="015" ind1=" " ind2=" ">
+ <subfield code="a">0006576</subfield>
+ <subfield code="2">nbf</subfield>
+ </datafield>
+ <datafield tag="020" ind1=" " ind2=" ">
+ <subfield code="a">8259109735</subfield>
+ <subfield code="q">ib.</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">000088838-47bibsys_network</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)000088838</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)101062818</subfield>
+ </datafield>
+ <datafield tag="040" ind1=" " ind2=" ">
+ <subfield code="a">NO-OsNB</subfield>
+ <subfield code="b">nob</subfield>
+ <subfield code="e">katreg</subfield>
+ </datafield>
+ <datafield tag="041" ind1="1" ind2=" ">
+ <subfield code="h">eng</subfield>
+ </datafield>
+ <datafield tag="042" ind1=" " ind2=" ">
+ <subfield code="a">norbibl</subfield>
+ </datafield>
+ <datafield tag="044" ind1=" " ind2=" ">
+ <subfield code="c">no</subfield>
+ </datafield>
+ <datafield tag="082" ind1="7" ind2="4">
+ <subfield code="a">823</subfield>
+ <subfield code="q">NO-OsNB</subfield>
+ <subfield code="2">4/nor</subfield>
+ </datafield>
+ <datafield tag="084" ind1=" " ind2=" ">
+ <subfield code="a">Pf 5</subfield>
+ <subfield code="2">ubtkl/2</subfield>
+ </datafield>
+ <datafield tag="100" ind1="1" ind2=" ">
+ <subfield code="a">Siamon, Sharon</subfield>
+ <subfield code="0">(NO-TrBIB)99016032</subfield>
+ </datafield>
+ <datafield tag="245" ind1="1" ind2="0">
+ <subfield code="a">Fanget i stormen</subfield>
+ <subfield code="c">Sharon Siamon ; [illustrasjoner: Lindsay Graham ; oversatt av: &#xD8;ystein Rosse]</subfield>
+ </datafield>
+ <datafield tag="246" ind1="1" ind2=" ">
+ <subfield code="a">Sky horse</subfield>
+ <subfield code="i">Originaltittel</subfield>
+ </datafield>
+ <datafield tag="260" ind1=" " ind2=" ">
+ <subfield code="a">Stavanger</subfield>
+ <subfield code="b">Pennyklubben</subfield>
+ <subfield code="c">cop. 1999</subfield>
+ </datafield>
+ <datafield tag="300" ind1=" " ind2=" ">
+ <subfield code="a">154 s.</subfield>
+ <subfield code="b">ill.</subfield>
+ </datafield>
+ <datafield tag="490" ind1="1" ind2=" ">
+ <subfield code="a">Pennyklubben</subfield>
+ </datafield>
+ <datafield tag="490" ind1="1" ind2=" ">
+ <subfield code="a">Mustang Mountain</subfield>
+ </datafield>
+ <datafield tag="506" ind1="0" ind2=" ">
+ <subfield code="f">&#xC5;pen tilgang</subfield>
+ </datafield>
+ <datafield tag="533" ind1=" " ind2=" ">
+ <subfield code="a">Elektronisk reproduksjon</subfield>
+ <subfield code="b">[Norge]</subfield>
+ <subfield code="c">Nasjonalbiblioteket Digital</subfield>
+ <subfield code="d">2010-05-11</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">Rosse, &#xD8;ystein,</subfield>
+ <subfield code="d">1956-</subfield>
+ <subfield code="4">trl</subfield>
+ <subfield code="0">(NO-TrBIB)90817877</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">F&#xF8;reland, Jorunn,</subfield>
+ <subfield code="d">1954-</subfield>
+ <subfield code="4">edt</subfield>
+ <subfield code="0">(NO-TrBIB)62845</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">Graham, Lindsay.</subfield>
+ <subfield code="4">ill</subfield>
+ <subfield code="0">(NO-TrBIB)10053272</subfield>
+ </datafield>
+ <datafield tag="800" ind1="1" ind2=" ">
+ <subfield code="a">Siamon, Sharon</subfield>
+ <subfield code="t">Mustang Mountain</subfield>
+ </datafield>
+ <datafield tag="830" ind1=" " ind2="0">
+ <subfield code="a">Pennyklubben</subfield>
+ </datafield>
+ <datafield tag="856" ind1="4" ind2="0">
+ <subfield code="3">Fulltekst</subfield>
+ <subfield code="u">http://urn.nb.no/URN:NBN:no-nb_digibok_2008100700035</subfield>
+ <subfield code="y">NB digitalisert</subfield>
+ <subfield code="z">Elektronisk reproduksjon. Gratis. For norske IP-adresser</subfield>
+ </datafield>
+ <datafield tag="901" ind1=" " ind2=" ">
+ <subfield code="a">90</subfield>
+ </datafield>
+ <datafield tag="913" ind1=" " ind2=" ">
+ <subfield code="a">Norbok</subfield>
+ <subfield code="b">NB</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_NB</subfield>
+ <subfield code="6">990000888384702202</subfield>
+ <subfield code="9">D</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_NTNU_UB</subfield>
+ <subfield code="6">990000888384702203</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+</record></zs:recordData><zs:recordPosition>2</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+ <leader>00553cam a22001811c 4500</leader>
+ <controlfield tag="001">990000922904702201</controlfield>
+ <controlfield tag="005">20000121122456.0</controlfield>
+ <controlfield tag="007">ta</controlfield>
+ <controlfield tag="008">000121s1901 xx#|||||||||||000|u|eng|d</controlfield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">000092290-47bibsys_network</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)000092290</subfield>
+ </datafield>
+ <datafield tag="040" ind1=" " ind2=" ">
+ <subfield code="a">NO-TrBIB</subfield>
+ <subfield code="b">nob</subfield>
+ <subfield code="e">katreg</subfield>
+ </datafield>
+ <datafield tag="100" ind1="1" ind2=" ">
+ <subfield code="a">Garland, Hamlin</subfield>
+ <subfield code="0">(NO-TrBIB)90236419</subfield>
+ </datafield>
+ <datafield tag="245" ind1="1" ind2="4">
+ <subfield code="a">The captain of the Gray-horse troop :</subfield>
+ <subfield code="b">a novel</subfield>
+ <subfield code="c">by Hamlin Garland</subfield>
+ </datafield>
+ <datafield tag="260" ind1=" " ind2=" ">
+ <subfield code="a">New York</subfield>
+ <subfield code="b">Grosset &amp; Dunlap</subfield>
+ <subfield code="c">1901</subfield>
+ </datafield>
+ <datafield tag="300" ind1=" " ind2=" ">
+ <subfield code="a">III, 414 s.</subfield>
+ </datafield>
+ <datafield tag="901" ind1=" " ind2=" ">
+ <subfield code="a">70</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_UBO</subfield>
+ <subfield code="6">990000922904702204</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+</record></zs:recordData><zs:recordPosition>3</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+ <leader>01163cgm a2200289 c 4500</leader>
+ <controlfield tag="001">990001425064702201</controlfield>
+ <controlfield tag="005">20160519155505.0</controlfield>
+ <controlfield tag="007">vd |v||||</controlfield>
+ <controlfield tag="008">050107s1998 xx#|||||||||||####v|eng|d</controlfield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">000142506-47bibsys_network</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)000142506</subfield>
+ </datafield>
+ <datafield tag="040" ind1=" " ind2=" ">
+ <subfield code="a">NO-TrBIB</subfield>
+ <subfield code="b">nob</subfield>
+ <subfield code="e">katreg</subfield>
+ </datafield>
+ <datafield tag="245" ind1="0" ind2="4">
+ <subfield code="a">The horse whisperer</subfield>
+ <subfield code="c">directed by Robert Redford ; produced by Robert Redford and Patrick Markey</subfield>
+ <subfield code="h">[videoopptak]</subfield>
+ </datafield>
+ <datafield tag="260" ind1=" " ind2=" ">
+ <subfield code="a">USA</subfield>
+ <subfield code="b">Touchstone Pictures : Wildhood Enterprises</subfield>
+ <subfield code="c">1998 (DVD-distribusjon s.a.)</subfield>
+ </datafield>
+ <datafield tag="300" ind1=" " ind2=" ">
+ <subfield code="a">1 videoplate (DVD-video) (163 min)</subfield>
+ <subfield code="b">lyd, kol.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Norsk tittel: Hestehviskeren.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Rolleliste: Robert Redford, Kristin Scott Thomas, Sam Neill, Dianne Wiest, Scarlett Johansson.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Filmen bygger p&#xE5; en roman av Nicholas Evans.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Romantisk drama.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Widescreen.</subfield>
+ </datafield>
+ <datafield tag="500" ind1=" " ind2=" ">
+ <subfield code="a">Kodet for region 2</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">Redford, Robert,</subfield>
+ <subfield code="d">1936-</subfield>
+ <subfield code="0">(NO-TrBIB)90852905</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2="2">
+ <subfield code="a">Evans, Nicholas,</subfield>
+ <subfield code="d">1950-</subfield>
+ <subfield code="0">(NO-TrBIB)90889377</subfield>
+ </datafield>
+ <datafield tag="700" ind1="1" ind2=" ">
+ <subfield code="a">Thomas, Kristin Scott,</subfield>
+ <subfield code="d">1960-</subfield>
+ <subfield code="0">(NO-TrBIB)98041690</subfield>
+ </datafield>
+ <datafield tag="740" ind1="0" ind2=" ">
+ <subfield code="a">Hestehviskeren</subfield>
+ </datafield>
+ <datafield tag="901" ind1=" " ind2=" ">
+ <subfield code="a">80</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_HH</subfield>
+ <subfield code="6">999919812666102214</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+</record></zs:recordData><zs:recordPosition>4</zs:recordPosition></zs:record><zs:record><zs:recordSchema/><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+ <leader>00814cam a2200253 c 4500</leader>
+ <controlfield tag="001">990001522504702201</controlfield>
+ <controlfield tag="005">20000216130809.0</controlfield>
+ <controlfield tag="007">ta</controlfield>
+ <controlfield tag="008">000216s1999 xx#|||||||||||000|u|eng|d</controlfield>
+ <datafield tag="020" ind1=" " ind2=" ">
+ <subfield code="a">9157659087</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">000152250-47bibsys_network</subfield>
+ </datafield>
+ <datafield tag="035" ind1=" " ind2=" ">
+ <subfield code="a">(NO-TrBIB)000152250</subfield>
+ </datafield>
+ <datafield tag="040" ind1=" " ind2=" ">
+ <subfield code="a">NO-TrBIB</subfield>
+ <subfield code="b">nob</subfield>
+ <subfield code="e">katreg</subfield>
+ </datafield>
+ <datafield tag="084" ind1=" " ind2=" ">
+ <subfield code="a">UP.F.XXM</subfield>
+ <subfield code="2">bar</subfield>
+ </datafield>
+ <datafield tag="084" ind1=" " ind2=" ">
+ <subfield code="a">UPQ.PJ</subfield>
+ <subfield code="2">bar</subfield>
+ </datafield>
+ <datafield tag="100" ind1="1" ind2=" ">
+ <subfield code="a">Sandin, Andreas</subfield>
+ <subfield code="0">(NO-TrBIB)7021</subfield>
+ </datafield>
+ <datafield tag="245" ind1="1" ind2="0">
+ <subfield code="a">Studies of gastrin and gastric secretion in the horse</subfield>
+ <subfield code="c">Andreas Sandin</subfield>
+ </datafield>
+ <datafield tag="260" ind1=" " ind2=" ">
+ <subfield code="a">Uppsala</subfield>
+ <subfield code="b">[A. Sandin]</subfield>
+ <subfield code="c">1999</subfield>
+ </datafield>
+ <datafield tag="300" ind1=" " ind2=" ">
+ <subfield code="a">1 b. (flere pag.)</subfield>
+ <subfield code="b">ill.</subfield>
+ </datafield>
+ <datafield tag="490" ind1="0" ind2=" ">
+ <subfield code="a">Acta universitatis agriculturae sueciae. Veterinaria</subfield>
+ <subfield code="v">69</subfield>
+ </datafield>
+ <datafield tag="502" ind1=" " ind2=" ">
+ <subfield code="a">Avhandling (doktorgrad) - Sveriges lantbruksuniversitet, 1999</subfield>
+ </datafield>
+ <datafield tag="901" ind1=" " ind2=" ">
+ <subfield code="a">80</subfield>
+ </datafield>
+ <datafield tag="917" ind1=" " ind2=" ">
+ <subfield code="a">d</subfield>
+ </datafield>
+ <datafield tag="852" ind1="0" ind2="1">
+ <subfield code="a">47BIBSYS_NMBU</subfield>
+ <subfield code="6">990001522504702213</subfield>
+ <subfield code="9">P</subfield>
+ </datafield>
+</record></zs:recordData><zs:recordPosition>5</zs:recordPosition></zs:record></zs:records><zs:nextRecordPosition>6</zs:nextRecordPosition><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:query>horse</zs:query><zs:maximumRecords>5</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>
+

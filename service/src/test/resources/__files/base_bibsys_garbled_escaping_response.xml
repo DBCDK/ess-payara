@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:numberOfRecords>5800</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema/><zs:recordXMLEscaping>LALAESCAPING</zs:recordXMLEscaping><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01218cam a2200265 c 4500</leader>
+  <controlfield tag="001">990000662304702201</controlfield>
+  <controlfield tag="005">20060424084326.0</controlfield>
+  <controlfield tag="007">ta</controlfield>
+  <controlfield tag="008">060424s1996    xx#|||||||||||000|u|eng|d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">0801852439</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">000066230-47bibsys_network</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(NO-TrBIB)000066230</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">NO-TrBIB</subfield>
+    <subfield code="b">nob</subfield>
+    <subfield code="e">katreg</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="4">
+    <subfield code="a">The theatre of images</subfield>
+    <subfield code="c">edited with introductory essays and a new afterword by Bonnie Marranca</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">Baltimore</subfield>
+    <subfield code="b">The Johns Hopkins University press</subfield>
+    <subfield code="c">c1996</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">XV, 168 s.</subfield>
+    <subfield code="b">ill.</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">Foreman, Richard / Pandering to the masses: a misrepresentation. Wilson, Robert / A letter for queen Victoria. Breuer, Lee / The red horse animation. Orig.utg.: c1977</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Marranca, Bonnie</subfield>
+    <subfield code="0">(NO-TrBIB)90134941</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2="2">
+    <subfield code="a">Foreman, Richard</subfield>
+    <subfield code="0">(NO-TrBIB)90585460</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2="2">
+    <subfield code="a">Breuer, Lee</subfield>
+    <subfield code="0">(NO-TrBIB)90304943</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2="2">
+    <subfield code="a">Wilson, Robert,</subfield>
+    <subfield code="d">1941-</subfield>
+    <subfield code="0">(NO-TrBIB)97054809</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="2">
+    <subfield code="3">Beskrivelse fra forlaget (kort)</subfield>
+    <subfield code="u">http://content.bibsys.no/content/?type=descr_publ_brief&amp;isbn=0801852439</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="2">
+    <subfield code="3">Beskrivelse fra forlaget (lang)</subfield>
+    <subfield code="u">http://content.bibsys.no/content/?type=descr_publ_full&amp;isbn=0801852439</subfield>
+  </datafield>
+  <datafield tag="901" ind1=" " ind2=" ">
+    <subfield code="a">80</subfield>
+  </datafield>
+  <datafield tag="852" ind1="0" ind2="1">
+    <subfield code="a">47BIBSYS_HIO</subfield>
+    <subfield code="6">990000662304702218</subfield>
+    <subfield code="9">P</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records><zs:nextRecordPosition>2</zs:nextRecordPosition><zs:echoedSearchRetrieveRequest><zs:version>2.0</zs:version><zs:query>horse</zs:query><zs:maximumRecords>1</zs:maximumRecords><zs:recordXMLEscaping>xml</zs:recordXMLEscaping></zs:echoedSearchRetrieveRequest></zs:searchRetrieveResponse>

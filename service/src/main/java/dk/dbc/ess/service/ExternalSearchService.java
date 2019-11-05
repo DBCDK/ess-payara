@@ -123,7 +123,7 @@ public class ExternalSearchService {
         return serverError("Internal Server Error");
     }
 
-    private Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
+    Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
         throws InterruptedException, ExecutionException {
         final String controlField = "controlfield";
         final String zeroZeroOne = "001";
@@ -193,7 +193,7 @@ public class ExternalSearchService {
         return Response.ok(essResponse, MediaType.APPLICATION_XML_TYPE).build();
     }
 
-    private Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
+    Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
             throws Exception {
         Invocation invocation = client
                 .target(sruTargetUrl)
@@ -206,11 +206,11 @@ public class ExternalSearchService {
         return timerSruRequest.time(() -> invocation.invoke());
     }
 
-    private SearchRetrieveResponse responseSru(Response response) throws  Exception {
+    SearchRetrieveResponse responseSru(Response response) throws  Exception {
         return  timerSruReadResponse.time(() -> response.readEntity(SearchRetrieveResponse.class));
     }
 
-    private Response serverError(String message) {
+    Response serverError(String message) {
         return Response.serverError().entity(message).build();
     }
 
