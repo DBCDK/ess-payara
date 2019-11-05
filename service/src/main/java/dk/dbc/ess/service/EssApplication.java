@@ -17,7 +17,8 @@ public class EssApplication extends Application {
 
     private static final Set<Class<?>> classes = new HashSet<>();
     static {
-        // todo
+        classes.add(ExternalSearchService.class);
+        classes.add(HowRU.class);
     }
 
     public Set<Class<?>> getClasses() { return classes; }
