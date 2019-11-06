@@ -52,8 +52,6 @@ import java.util.concurrent.Callable;
  * @author DBC {@literal <dbc.dk>}
  */
 public class Formatting {
-    private static final ObjectMapper O = new ObjectMapper();
-
     private static final Logger log = LoggerFactory.getLogger(Formatting.class);
 
     public static final ErrorDocument ERROR_DOCUMENT = new ErrorDocument();
@@ -61,6 +59,12 @@ public class Formatting {
     private final String openFormatUrl;
     private final Client client;
     private final Timer timerFormatRequest;
+
+    public Formatting() {
+        openFormatUrl = null;
+        client = null;
+        timerFormatRequest = null;
+    }
 
     public Formatting(Settings settings, MetricRegistry metrics, Client client) {
         openFormatUrl = settings.getOpenFormatUrl();

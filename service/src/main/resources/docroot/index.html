@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>External Search System (Payara)</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font-size: x-large;
+                text-align: center;
+            }
+            form {
+                display: inline-block;
+            }
+            .desctiption {
+                width: 80vw;
+                text-align: left;
+                display: inline-block;
+            }
+            dt {
+                font-variant: small-caps;
+                font-weight: bold;
+            }
+            dl {
+                padding-left: 3em;
+            }
+            hr {
+                width: 98%;
+            }
+            .box {
+                display: inline-block;
+            }
+            .box > div {
+                display: flex;
+                margin-bottom: .2em;
+            }
+            .box > div:last-child {
+                margin: initial;
+            }
+            .box > div > * {
+                flex-grow: 1;
+                margin-right: .1em;
+            }
+            .box > div > input {
+                flex-shrink: 1;
+            }
+            .box > div > *:last-child {
+                margin: initial;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>External Search System (Payara)</h1>
+        <hr>
+        <h2>Example request</h2>
+        <form action="api/" method="GET" target="_blank" class="box">
+            <div>
+                <select name="base" style="min-width: 10vw;">
+                    <option>bibsys</option>
+                    <option>libris</option>
+                    <option>OLUCWorldCat</option>
+                    <option>ArticleFirst</option>
+                </select>
+                <input type="text" name="query" placeholder="query" style="min-width: 55vw">
+            </div>
+            <div>
+                <input type="number" name="start" placeholder="first row (1)">
+                <input type="number" name="rows" placeholder="number of rows (10)">
+            </div>
+            <div>
+                <select name="format" style="min-width: 10vw;">
+                    <option>netpunkt_standard</option>
+                    <option>netpunkt_brief</option>
+                    <option>netpunkt_marc21</option>
+                    <option>bob_detail</option>
+                </select>
+                <input type="text" name="trackingId" placeholder="tracking-id" style="min-width: 45vw;">
+                <input type="submit" value="query" style="min-width: 5vw;">
+            </div>
+        </form>
+        <hr>
+        <h2>Request description</h2>
+        <div class="desctiption">
+            <h3>Request</h3>
+            <dl>
+                <dt>base</dt><dd>In which base to search.</dd>
+                <dt>query</dt><dd>The CQL query to search for.</dd>
+                <dt>start</dt><dd>A number which indicates the first row to return (>=1).</dd>
+                <dt>rows</dt><dd>A number indicating how many rows (at most) are wanted.</dd>
+                <dt>format</dt><dd>Which format (openformat-format) that the rows are expected to be in.</dd>
+                <dt>trackingId</dt><dd>Some identifier for the query, if none is supplied one will be generated for you (yes, this is case sensitive).</dd>
+            </dl>
+            <h3>Response</h3>
+            Response is in XML, with the namespace &quot;info:ESSv0&quot;.
+            <dl>
+                <dt>hits</dt><dd>How many rows can be fetched for this query.</dd>
+                <dt>records</dt><dd>A list of records, content of which should
+                    correspond to &quot;format&quot; in the request.<br>
+                    Or an &quot;error&quot; node in ESS namespace, with a
+                    &quot;message&quot; element with a NOT user presentable
+                    server response.</dd>
+                <dt>trackingId</dt><dd>Echo of the request.</dd>
+            </dl>
+        </div>
+    </body>
+</html>
