@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static javax.xml.bind.JAXBContext.newInstance;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
@@ -84,7 +85,7 @@ public class EssServiceTest {
         doReturn(responseOk).when(essService).requestSru(anyString(), anyString(), anyString(), anyInt(), anyInt());
 
         Response resp = essService.requestCQL("badbase", "", 0, 0, "format", null);
-        assertNotEquals("Not success", 200, resp.getStatus());
+        assertNotEquals("Not success", 200, resp == null ? -1 : resp.getStatus());
     }
 
     @Test
@@ -171,13 +172,13 @@ public class EssServiceTest {
     }
 
     private <T> T readXMLObject(Class<? extends T> t, String resource) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(t);
+        JAXBContext jaxbContext = newInstance(t);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         return (T) unmarshaller.unmarshal(getClass().getResource(resource));
     }
 
     private static <T> String writeXmlObject(T obj) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(obj.getClass());
+        JAXBContext jaxbContext = newInstance(obj.getClass());
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter writer = new StringWriter();
         marshaller.marshal(obj, writer);
