@@ -1,7 +1,7 @@
 # external-search-system (Payara)
 
 Denne service er en migreret version af "external-search-system" (<https://github.com/DBCDK/external-search-system>) til Payara.
-Dette er en service som faciliterer universal search, 
+Det er en service som faciliterer universal search, 
 hvor resultater kan returneres i formater understøttet i Open Format.
 
 ## Kørsel
