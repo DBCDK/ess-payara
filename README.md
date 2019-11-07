@@ -1,13 +1,12 @@
 # external-search-system (Payara)
 
 Denne service er en migreret version af "external-search-system" (<https://github.com/DBCDK/external-search-system>) til Payara.
-Det er en service som faciliterer universal search, 
-hvor resultater kan returneres i formater understøttet i Open Format.
+Det er en service som faciliterer universal search, hvor resultater kan returneres i formater understøttet i Open Format.
 
 ## Kørsel
 
-Servicen er et Payara projekt med config filen i `service/src/main/resources/config.yaml`. 
-Følgende environment variabler er påkrævede:
+Servicen er et Payara projekt med config defineret i `service/src/main/resources/config.yaml`. 
+Følgende environment-variabler er obligatoriske:
  - `BASES`: Hvilke baser som servicen tillader at efterspørge meta proxyen med til universal search.
  - `META_PROXY_URL`: Endpoint for meta proxy til universal search.
  - `OPEN_FORMAT_URL`: Url til en open format service. 
