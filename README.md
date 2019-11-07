@@ -25,4 +25,4 @@ Eksempel URL:
  
 ## Noter
 
- - Få openformat endpoint der kan ikke fejler, deploy ess med denne
+ - Få openformat endpoint der kan ikke fejler, deploy External Search Service med denne
