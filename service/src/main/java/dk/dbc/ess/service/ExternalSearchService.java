@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2019 DBC A/S (http://dbc.dk/)
+ *
+ * This is part of dbc-ess-payara
+ *
+ * dbc-ess-payara is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * dbc-ess-payara is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dbc.ess.service;
 
 import dk.dbc.ess.service.response.EssResponse;
@@ -29,11 +47,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-
+/**
+ *
+ * @author Noah Torp-Smith (nots@dbc.dk)
+ */
 public class ExternalSearchService {
     private static final Logger log = LoggerFactory.getLogger(ExternalSearchService.class);
-    private static final String controlField = "controlfield";
-    private static final String zeroZeroOne = "001";
 
     Client client;
     Collection<String> knownBases;
@@ -46,7 +65,7 @@ public class ExternalSearchService {
     Timer timerRequest;
     int maxPageSize;
 
-    public ExternalSearchService(Settings settings, MetricRegistry metrics, Client client) { // todo: metrics stuff
+    public ExternalSearchService(Settings settings, MetricRegistry metrics, Client client) {
         this.client = client;
 
         this.knownBases = settings.getBases();
@@ -103,7 +122,7 @@ public class ExternalSearchService {
                 "; start: " + start + "; rows: " + rows +
                 "; trackingId: " + trackingId + "; query: " + query + "; type: " + (isRPN ? "rpn" : "cql"));
 
-        try (Timer.Context timer = timerRequest.time()) {
+        try (Timer.Context ignored = timerRequest.time()) {
             String queryParam = isRPN ? "x-pqueryy" : "query";
             Response response = requestSru(base, queryParam, query, start, rows);
 

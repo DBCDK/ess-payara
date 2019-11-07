@@ -4,7 +4,6 @@ Denne service er en migreret version af "external-search-system" (<https://githu
 Det er en service som faciliterer universal search, hvor resultater kan returneres i formater understøttet i Open Format.
 
 ## Kørsel
-
 Servicen er et Payara projekt med config defineret i `service/src/main/resources/config.yaml`. 
 Følgende environment-variabler er obligatoriske:
  - `BASES`: Hvilke baser som servicen tillader at efterspørge meta proxyen med til universal search.
@@ -24,5 +23,4 @@ Eksempel URL:
 `http://host:port/api/?base=bibsys&query=horse&start=&rows=1&format=netpunkt_standard&trackingId=`
  
 ## Noter
-
  - Få OpenFormat endpoint der ikke fejler, deploy External Search Service med denne.

@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2019 DBC A/S (http://dbc.dk/)
+ *
+ * This is part of dbc-ess-payara
+ *
+ * dbc-ess-payara is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * dbc-ess-payara is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dbc.ess.service;
 
 import com.github.tomakehurst.wiremock.http.Fault;
@@ -19,8 +37,11 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 
+/**
+ *
+ * @author Noah Torp-Smith (nots@dbc.dk)
+ */
 public class EssServiceIT {
-//    private static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("config_test.yaml"); // fixme
     private EssConfiguration conf;
     private Client client;
     private ExternalSearchService essService;
@@ -426,8 +447,7 @@ public class EssServiceIT {
 
     @Test
     public void externalBaseTimeoutTest() {
-        /* Testing Read-timeout for different bases
-         */
+        // Testing Read-timeout for different bases
         stubFor(get(urlMatching("/.*?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -446,23 +466,6 @@ public class EssServiceIT {
             assertEquals(500, response.getStatus());
         }
     }
-
-    /*@Test
-    public void formatterNotValidTest() throws Exception {
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_horse_response.xml")));
-        // TODO open format should fail, and when we know how it errors, we should error appropriately
-        // TODO needs open format stub...
-        Response response = client.target(
-                String.format("http://localhost:%d/api/?base=bibsys&query=horse&start=&rows=1&format=XYZ&trackingId=", dropWizzardRule.getLocalPort()))
-                .request()
-                .get();
-        assertEquals(500, response.getStatus());
-    }*/
 
     @Test
     public void baseNotValidTest() throws Exception {
@@ -587,7 +590,6 @@ public class EssServiceIT {
 
         checkHealthCheck();
     }
-
 
     private void checkHealthCheck() {
         Response response = client.target(

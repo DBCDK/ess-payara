@@ -103,7 +103,6 @@
       <version>2.22.2</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
 </project>
