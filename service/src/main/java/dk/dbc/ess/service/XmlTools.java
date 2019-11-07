@@ -98,7 +98,7 @@ public class XmlTools {
             }
         }
         if (prefix != null) {
-            element.removeAttribute(prefix.isEmpty() ? "xmlns" : ( "xmlns:" + prefix ));
+            element.removeAttribute(prefix.isEmpty() ? "xmlns" :  "xmlns:" + prefix);
         }
     }
 }

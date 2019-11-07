@@ -56,14 +56,14 @@ public class ExternalSearchService {
 
     Client client;
     Collection<String> knownBases;
-    String sruTargetUrl;
+    private String sruTargetUrl;
     Formatting formatting;
 
     ExecutorService executorService;
     Timer timerSruRequest;
     Timer timerSruReadResponse;
     Timer timerRequest;
-    int maxPageSize;
+    private int maxPageSize;
 
     public ExternalSearchService(Settings settings, MetricRegistry metrics, Client client) {
         this.client = client;
@@ -147,9 +147,8 @@ public class ExternalSearchService {
         final String controlField = "controlfield";
         final String zeroZeroOne = "001";
 
-        long hits = sru.getNumberOfRecords();
         EssResponse essResponse = new EssResponse();
-        essResponse.hits = hits;
+        essResponse.hits = sru.getNumberOfRecords();
         essResponse.records = new ArrayList<>();
         essResponse.trackingId = trackingId;
         Records recs = sru.getRecords();
@@ -222,7 +221,7 @@ public class ExternalSearchService {
                 .queryParam("maximumRecords", stepValue)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .buildGet();
-        return timerSruRequest.time(() -> invocation.invoke());
+        return timerSruRequest.time(invocation::invoke);
     }
 
     SearchRetrieveResponse responseSru(Response response) throws  Exception {

@@ -20,7 +20,6 @@ package dk.dbc.ess.service;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.openformat.FormatRequest;
 import dk.dbc.openformat.FormatResponse;
 import dk.dbc.openformat.OriginalData;
@@ -31,7 +30,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
