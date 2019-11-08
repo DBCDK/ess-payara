@@ -124,7 +124,7 @@ public class EssServiceTest {
         assertTrue("Documents are expected to be equivalent: ", equivalent);
     }
 
-    private ExternalSearchService mockService(String bases, String formats, String... docs) throws ExecutionException, InterruptedException {
+    protected static ExternalSearchService mockService(String bases, String formats, String... docs) throws ExecutionException, InterruptedException {
         Timer timer = mockTimer();
         ExternalSearchService essService = mock(ExternalSearchService.class);
         essService.client = null;
@@ -156,7 +156,7 @@ public class EssServiceTest {
         }
     }
 
-    private Formatting makeFormatting(String... xmls) {
+    protected static Formatting makeFormatting(String... xmls) {
         Formatting formatting = mock(Formatting.class);
         doCallRealMethod().when(formatting).formattingError(anyString());
         OngoingStubbing<Callable<Element>> stub = when(formatting.formattingCall(any(Element.class), anyString(), anyString(), anyString()));
@@ -166,13 +166,13 @@ public class EssServiceTest {
         return formatting;
     }
 
-    private Timer mockTimer() {
+    protected static Timer mockTimer() {
         Timer timer = mock(Timer.class);
         doReturn(mock(Timer.Context.class)).when(timer).time();
         return timer;
     }
 
-    private ExecutorService mockExecutorService() {
+    protected static ExecutorService mockExecutorService() {
         ExecutorService executor = mock(ExecutorService.class);
         when(executor.submit(any(Callable.class)))
                 .thenAnswer(i -> {

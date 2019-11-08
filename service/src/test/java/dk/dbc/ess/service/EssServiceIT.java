@@ -18,6 +18,7 @@
  */
 package dk.dbc.ess.service;
 
+import com.codahale.metrics.Timer;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import dk.dbc.ess.service.response.EssResponse;
@@ -26,12 +27,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Element;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.function.Supplier;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static junit.framework.TestCase.assertEquals;
@@ -49,6 +48,8 @@ public class EssServiceIT {
     private final int readTimeout = 1500;              // ms
     private final int fixedDelay  = readTimeout + 500; // ms
 
+    public EssServiceIT() {}
+
     @Rule
     public WireMockRule wireMockRule = ((Supplier<WireMockRule>)()-> {
         WireMockRule wireMockRule = new WireMockRule(wireMockConfig().dynamicPort());
@@ -57,12 +58,8 @@ public class EssServiceIT {
     }).get();
 
     @Before
-    public void setUp() {
-        EssConfiguration conf = new EssConfiguration(
-                "META_PROXY_URL=http://localhost:" + wireMockRule.port() + "/",
-                "OPEN_FORMAT_URL=http://localhost:" + wireMockRule.port() + "/",
-                "BASES=libris,bibsys"
-        );
+    public void setUp() throws Exception {
+        essService = EssServiceTest.mockService("base", "format", "<foo/>", "<bar/>");
     }
 
     @Test

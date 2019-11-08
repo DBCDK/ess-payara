@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-full:latest
+FROM docker.dbc.dk/payara5-micro:latest
 
 LABEL \
     META_PROXY_URL="Url of metaproxy (indexdata.com) (required)" \

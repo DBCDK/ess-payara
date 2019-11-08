@@ -29,6 +29,13 @@ import javax.validation.constraints.NotNull;
  */
 public class Settings {
 
+    public Settings(EssConfiguration configuration) {
+        metaProxyUrl = configuration.getMetaProxyUrl();
+        openFormatUrl = configuration.getOpenFormatUrl();
+        bases = String.join(",", configuration.getBases());
+        maxPageSize = Math.toIntExact(configuration.getMaxPageSize());
+    }
+
     @NotNull
     private String metaProxyUrl;
 
