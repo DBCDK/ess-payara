@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  *
@@ -81,6 +82,8 @@ public class Settings {
     public void setMaxPageSize(Integer maxPageSize) {
         this.maxPageSize = maxPageSize;
     }
+
+    protected ClientBuilder getClientBuilder() { return ClientBuilder.newBuilder(); }
 
     @Override
     public String toString() {

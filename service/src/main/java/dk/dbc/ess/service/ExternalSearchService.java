@@ -65,8 +65,8 @@ public class ExternalSearchService {
     Timer timerRequest;
     private int maxPageSize;
 
-    public ExternalSearchService(Settings settings, MetricRegistry metrics, Client client) {
-        this.client = client;
+    public ExternalSearchService(Settings settings, MetricRegistry metrics) {
+        this.client = settings.getClientBuilder().build();
 
         this.knownBases = settings.getBases();
         this.sruTargetUrl = settings.getMetaProxyUrl();
@@ -123,7 +123,7 @@ public class ExternalSearchService {
                 "; trackingId: " + trackingId + "; query: " + query + "; type: " + (isRPN ? "rpn" : "cql"));
 
         try (Timer.Context ignored = timerRequest.time()) {
-            String queryParam = isRPN ? "x-pqueryy" : "query";
+            String queryParam = isRPN ? "x-pquery" : "query";
             Response response = requestSru(base, queryParam, query, start, rows);
 
             if (!response.getStatusInfo().equals(Response.Status.OK)) {

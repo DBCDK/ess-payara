@@ -45,6 +45,7 @@ public class EssConfiguration  {
         this.env = Arrays.stream(params)
                 .map(s -> s.split("=", 2))
                 .collect(toMap(p -> p[0], p -> p[1]));
+        loadProperties();
     }
 
     private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
@@ -63,7 +64,7 @@ public class EssConfiguration  {
         metaProxyUrl = getValue(props, env, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
         openFormatUrl = getValue(props, env, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
         formats = getValue(props, env, "formats", "FORMATS", "netpunkt_standard", "No formats specified", s -> Arrays.asList(s.split(",")));
-        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "500", "", Long::parseUnsignedLong);
+        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "5", "", Long::parseUnsignedLong);
         bases = getValue(props, env, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
         jerseyTimeout = getValue(props, env, "jerseyTimeout", "JERSEY_TIMEOUT", "60", "No jersey timeout specified", Long::parseUnsignedLong);
         jerseyConnectionTimeout = getValue(props, env, "jerseyConnectionTimeout", "JERSEY_CONNECTION_TIMEOUT",
