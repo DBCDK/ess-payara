@@ -40,14 +40,13 @@ public class EssApplication extends Application {
         classes.add(HowRU.class);
     }
 
+    @Override
     public Set<Class<?>> getClasses() { return classes; }
 
     @Override
     public Map<String, Object> getProperties() {
-        Map<String, Object> props = new HashMap<>();
-
-        props.put("jersey.config.server.disableMoxyJson", true);
-
-        return props;
+        return new HashMap<String, Object>() {{
+            put("jersey.config.server.disableMoxyJson", true);
+        }};
     }
 }

@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,7 +44,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
@@ -73,7 +71,6 @@ public class EssServiceTest {
         doReturn(Response.Status.OK).when(responseOk).getStatusInfo();
         responseError = mock(Response.class);
         doReturn(Response.Status.INTERNAL_SERVER_ERROR).when(responseError).getStatusInfo();
-
     }
 
     @Test

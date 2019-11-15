@@ -55,7 +55,6 @@
         </jaxb:schemaBindings>
     </jaxb:bindings>
 
-
     <jaxb:bindings schemaLocation="openformat.xsd" node="/xs:schema">
         <jaxb:schemaBindings>
             <jaxb:package name="dk.dbc.openformat"/>

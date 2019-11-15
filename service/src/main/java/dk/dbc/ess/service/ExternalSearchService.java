@@ -67,21 +67,14 @@ public class ExternalSearchService {
 
     public ExternalSearchService(Settings settings, MetricRegistry metrics) {
         this.client = settings.getClientBuilder().build();
-
         this.knownBases = settings.getBases();
         this.sruTargetUrl = settings.getMetaProxyUrl();
         this.maxPageSize = settings.getMaxPageSize();
-
         this.executorService = Executors.newCachedThreadPool();
         this.formatting = new Formatting(settings, metrics, client);
-
         this.timerSruRequest = makeTimer(metrics, "sruRequest");
         this.timerSruReadResponse = makeTimer(metrics, "sruReadResponse");
         this.timerRequest = makeTimer(metrics, "Request");
-    }
-
-    private Timer makeTimer(MetricRegistry metricRegistry, String name) {
-        return metricRegistry.timer(getClass().getCanonicalName() + "#" + name);
     }
 
     @GET
@@ -226,6 +219,10 @@ public class ExternalSearchService {
 
     SearchRetrieveResponse responseSru(Response response) throws  Exception {
         return  timerSruReadResponse.time(() -> response.readEntity(SearchRetrieveResponse.class));
+    }
+
+    private Timer makeTimer(MetricRegistry metricRegistry, String name) {
+        return metricRegistry.timer(getClass().getCanonicalName() + "#" + name);
     }
 
     Response serverError(String message) {

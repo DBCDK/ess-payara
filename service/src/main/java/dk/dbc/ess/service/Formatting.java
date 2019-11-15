@@ -57,17 +57,10 @@ public class Formatting {
     private final Client client;
     private final Timer timerFormatRequest;
 
-    public Formatting() {
-        openFormatUrl = null;
-        client = null;
-        timerFormatRequest = null;
-    }
-
     public Formatting(Settings settings, MetricRegistry metrics, Client client) {
         openFormatUrl = settings.getOpenFormatUrl();
         this.client = client;
         this.timerFormatRequest = mkTimer(metrics, "formatRequest");
-
     }
 
     private Timer mkTimer(MetricRegistry metrics, String name) {
@@ -77,7 +70,6 @@ public class Formatting {
     private Element format(Element in, String outputFormat, String id, String trackingId) {
         try {
             FormatRequest request = new FormatRequest();
-
             request.setOutputFormat(outputFormat);
             request.setTrackingId(trackingId);
             OriginalData originalData = new OriginalData();
@@ -102,7 +94,6 @@ public class Formatting {
 
             Response response = timerFormatRequest.time(() -> invocation.invoke());
             Response.StatusType status = response.getStatusInfo();
-
             log.debug("status = {}", status);
 
             if (status.equals(Response.Status.OK)) {
@@ -145,13 +136,10 @@ public class Formatting {
 
     public Callable<Element> formattingError(String message) {
         return new FormattingError(message);
-
     }
 
     public class FormattingError implements Callable<Element> {
-
         private final String message;
-
         public FormattingError(String message) {
             this.message = message;
         }
@@ -163,7 +151,6 @@ public class Formatting {
     }
 
     public static class ErrorDocument {
-
         private Document doc;
         private Element node;
         private int[] pos;

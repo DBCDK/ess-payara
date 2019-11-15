@@ -37,9 +37,6 @@ import static java.util.stream.Collectors.toMap;
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
 public class EssConfiguration  {
-    public EssConfiguration() {
-        env = System.getenv();
-    }
 
     public EssConfiguration(String... params) {
         this.env = Arrays.stream(params)
@@ -71,7 +68,7 @@ public class EssConfiguration  {
                 "300", "No jersey connection timeout specified", Long::parseUnsignedLong);
     }
 
-    public String getMetaProxyUrl() { return  metaProxyUrl; }
+    public String getMetaProxyUrl() { return metaProxyUrl; }
     public String getOpenFormatUrl() { return openFormatUrl; }
     public List<String> getFormats() { return formats; }
     public long getMaxPageSize() { return maxPageSize; }

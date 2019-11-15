@@ -19,27 +19,23 @@
 package dk.dbc.ess.service;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import dk.dbc.ess.service.response.EssResponse;
-import dk.dbc.ess.service.response.HowRuResponse;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Element;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.function.Supplier;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  *
@@ -47,7 +43,6 @@ import static org.junit.Assert.*;
  */
 public class EssServiceIT {
 
-    public static final ObjectMapper O = new ObjectMapper();
     private EssConfiguration conf;
     private Client client;
     private ExternalSearchService essService;
@@ -90,6 +85,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
+
         Response result = essService.requestSru("bibsys", "query", "horse", 1, 1);
         assertEquals(200, result.getStatus());
     }
@@ -133,6 +129,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
+
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(200, response.getStatus());
@@ -162,6 +159,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
+
         Response response = essService.requestRPN("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(200, response.getStatus());
@@ -192,6 +190,7 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")
                         .withStatus(404)));
+
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(200, response.getStatus());
@@ -221,6 +220,7 @@ public class EssServiceIT {
                 .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
                 .willReturn(aResponse()
                         .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(5800,r.hits);
@@ -251,6 +251,7 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")
                         .withFixedDelay(fixedDelay)));
+
         // In this response, open format response is delayed by 2s, making the socket time out
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
@@ -401,6 +402,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
+
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(5800,r.hits);
@@ -474,6 +476,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
+
         Response response = essService.requestCQL("bibsys", "horse", 1, 100, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(5, r.records.size());
@@ -495,6 +498,7 @@ public class EssServiceIT {
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
+
         Response response = essService.requestCQL("bibsys", "horse", null, null, "netpunkt_standard", null);
         EssResponse r = (EssResponse) response.getEntity();
         assertEquals(5, r.records.size());
