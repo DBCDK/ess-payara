@@ -18,9 +18,14 @@
  */
 package dk.dbc.ess.service;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.client.ClientBuilder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -36,7 +41,23 @@ import static java.util.stream.Collectors.toMap;
  *
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
+@ApplicationScoped
+@Startup
 public class EssConfiguration  {
+
+    private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
+    private final Map<String, String> env;
+    private String metaProxyUrl;
+    private String openFormatUrl;
+    private List<String> formats;
+    private int maxPageSize;
+    private List<String> bases;
+    private long jerseyTimeout;
+    private long jerseyConnectionTimeout;
+
+    public EssConfiguration() {
+        this.env = System.getenv();
+    }
 
     public EssConfiguration(String... params) {
         this.env = Arrays.stream(params)
@@ -45,23 +66,13 @@ public class EssConfiguration  {
         loadProperties();
     }
 
-    private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
-    private final Map<String, String> env;
-
-    private String metaProxyUrl;
-    private String openFormatUrl;
-    private List<String> formats;
-    private long maxPageSize;
-    private List<String> bases;
-    private long jerseyTimeout;
-    private long jerseyConnectionTimeout;
-
+    @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("external-search-service");
         metaProxyUrl = getValue(props, env, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
         openFormatUrl = getValue(props, env, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
         formats = getValue(props, env, "formats", "FORMATS", "netpunkt_standard", "No formats specified", s -> Arrays.asList(s.split(",")));
-        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "5", "", Long::parseUnsignedLong);
+        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "5", "", Integer::parseUnsignedInt);
         bases = getValue(props, env, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
         jerseyTimeout = getValue(props, env, "jerseyTimeout", "JERSEY_TIMEOUT", "60", "No jersey timeout specified", Long::parseUnsignedLong);
         jerseyConnectionTimeout = getValue(props, env, "jerseyConnectionTimeout", "JERSEY_CONNECTION_TIMEOUT",
@@ -71,7 +82,7 @@ public class EssConfiguration  {
     public String getMetaProxyUrl() { return metaProxyUrl; }
     public String getOpenFormatUrl() { return openFormatUrl; }
     public List<String> getFormats() { return formats; }
-    public long getMaxPageSize() { return maxPageSize; }
+    public int getMaxPageSize() { return maxPageSize; }
     public List<String> getBases() { return bases; }
     public long getJerseyTimeout() { return jerseyTimeout; }
     public long getJerseyConnectionTimeout() { return jerseyConnectionTimeout; }
@@ -123,5 +134,7 @@ public class EssConfiguration  {
         }
         return new Properties();
     }
+
+    protected ClientBuilder getClientBuilder() { return ClientBuilder.newBuilder(); }
 
 }

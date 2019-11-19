@@ -65,13 +65,13 @@ public class ExternalSearchService {
     Timer timerRequest;
     private int maxPageSize;
 
-    public ExternalSearchService(Settings settings, MetricRegistry metrics) {
-        this.client = settings.getClientBuilder().build();
-        this.knownBases = settings.getBases();
-        this.sruTargetUrl = settings.getMetaProxyUrl();
-        this.maxPageSize = settings.getMaxPageSize();
+    public ExternalSearchService(EssConfiguration config, MetricRegistry metrics) {
+        this.client = config.getClientBuilder().build();
+        this.knownBases = config.getBases();
+        this.sruTargetUrl = config.getMetaProxyUrl();
+        this.maxPageSize = config.getMaxPageSize();
         this.executorService = Executors.newCachedThreadPool();
-        this.formatting = new Formatting(settings, metrics, client);
+        this.formatting = new Formatting(config, metrics, client);
         this.timerSruRequest = makeTimer(metrics, "sruRequest");
         this.timerSruReadResponse = makeTimer(metrics, "sruReadResponse");
         this.timerRequest = makeTimer(metrics, "Request");

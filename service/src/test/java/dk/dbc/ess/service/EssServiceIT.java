@@ -66,16 +66,15 @@ public class EssServiceIT {
                 "META_PROXY_URL=" + "http://localhost:" + wireMockRule.port() + "/",
                 "OPEN_FORMAT_URL="+ "http://localhost:" + wireMockRule.port() + "/",
                 "MAX_PAGE_SIZE=5"
-        );
-        Settings settings = new Settings(conf) {
+        ) {
             @Override
             protected ClientBuilder getClientBuilder() {
                 return JerseyClientBuilder.newBuilder();
             }
         };
         MetricRegistry metricsRegistry = new MetricRegistry();
-        client = settings.getClientBuilder().build();
-        essService = new ExternalSearchService(settings, metricsRegistry);
+        client = conf.getClientBuilder().build();
+        essService = new ExternalSearchService(conf, metricsRegistry);
     }
 
     @Test
