@@ -73,8 +73,12 @@ public class EssServiceIT {
             }
         };
         MetricRegistry metricsRegistry = new MetricRegistry();
-        client = conf.getClientBuilder().build();
-        essService = new ExternalSearchService(conf, metricsRegistry);
+        client = conf.getClient();
+        essService = new ExternalSearchService();
+        essService.configuration = conf;
+        essService.metrics = metricsRegistry;
+        essService.init();
+        essService.formatting = new Formatting(conf, metricsRegistry);
     }
 
     @Test

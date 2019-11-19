@@ -18,63 +18,65 @@
  */
 package dk.dbc.ess.service;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import dk.dbc.ess.service.response.EssResponse;
+import dk.dbc.sru.sruresponse.Record;
+import dk.dbc.sru.sruresponse.RecordXMLEscapingDefinition;
+import dk.dbc.sru.sruresponse.Records;
+import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import dk.dbc.sru.sruresponse.Record;
-import dk.dbc.sru.sruresponse.Records;
-import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
-import dk.dbc.sru.sruresponse.RecordXMLEscapingDefinition;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 
 /**
  *
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
+@Stateless
 public class ExternalSearchService {
     private static final Logger log = LoggerFactory.getLogger(ExternalSearchService.class);
 
-    Client client;
-    Collection<String> knownBases;
-    private String sruTargetUrl;
-    Formatting formatting;
+    @Inject
+    public EssConfiguration configuration;
+
+    @Inject
+    public Formatting formatting;
+
+    @Inject
+    public MetricRegistry metrics;
 
     ExecutorService executorService;
     Timer timerSruRequest;
     Timer timerSruReadResponse;
     Timer timerRequest;
-    private int maxPageSize;
 
-    public ExternalSearchService(EssConfiguration config, MetricRegistry metrics) {
-        this.client = config.getClientBuilder().build();
-        this.knownBases = config.getBases();
-        this.sruTargetUrl = config.getMetaProxyUrl();
-        this.maxPageSize = config.getMaxPageSize();
-        this.executorService = Executors.newCachedThreadPool();
-        this.formatting = new Formatting(config, metrics, client);
+    @PostConstruct
+    public void init() {
         this.timerSruRequest = makeTimer(metrics, "sruRequest");
         this.timerSruReadResponse = makeTimer(metrics, "sruReadResponse");
         this.timerRequest = makeTimer(metrics, "Request");
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     @GET
@@ -102,20 +104,21 @@ public class ExternalSearchService {
         if (start == null) {
             start = 1;
         }
-        if (rows == null || rows >= maxPageSize) {
-            rows = maxPageSize;
+        if (rows == null || rows >= configuration.getMaxPageSize()) {
+            rows = configuration.getMaxPageSize();
         }
         if (trackingId == null || trackingId.isEmpty()) {
             trackingId = UUID.randomUUID().toString();
         }
-        if (!knownBases.contains(base)) {
+        if (!configuration.getBases().contains(base)) {
             return serverError("Unknown base requested");
         }
         log.info("base: " + base + "; format: " + format +
                 "; start: " + start + "; rows: " + rows +
                 "; trackingId: " + trackingId + "; query: " + query + "; type: " + (isRPN ? "rpn" : "cql"));
 
-        try (Timer.Context ignored = timerRequest.time()) {
+//        try (Timer.Context ignored = timerRequest.time()) {
+        try {
             String queryParam = isRPN ? "x-pquery" : "query";
             Response response = requestSru(base, queryParam, query, start, rows);
 
@@ -206,8 +209,8 @@ public class ExternalSearchService {
 
     Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
             throws Exception {
-        Invocation invocation = client
-                .target(sruTargetUrl)
+        Invocation invocation = configuration.getClient()
+                .target(configuration.getMetaProxyUrl())
                 .path(base)
                 .queryParam(queryParam, query)
                 .queryParam("startRecord", start)

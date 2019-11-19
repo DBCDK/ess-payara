@@ -24,6 +24,7 @@ import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public class EssConfiguration  {
 
     private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
     private final Map<String, String> env;
+    private ClientBuilder clientBuilder;
+    private Client client;
     private String metaProxyUrl;
     private String openFormatUrl;
     private List<String> formats;
@@ -135,6 +138,18 @@ public class EssConfiguration  {
         return new Properties();
     }
 
-    protected ClientBuilder getClientBuilder() { return ClientBuilder.newBuilder(); }
+    protected ClientBuilder getClientBuilder() {
+        if (clientBuilder == null) {
+            clientBuilder = ClientBuilder.newBuilder();
+        }
+        return clientBuilder;
+    }
+
+    Client getClient() {
+        if (client == null) {
+            client = getClientBuilder().build();
+        }
+        return client;
+    }
 
 }

@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import wiremock.org.apache.commons.lang3.StringUtils;
+
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -39,14 +41,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -122,15 +123,20 @@ public class EssServiceTest {
     }
 
     protected static ExternalSearchService mockService(String bases, String formats, String... docs) throws ExecutionException, InterruptedException {
+        EssConfiguration conf = new EssConfiguration(
+                "BASES=libris,bibsys" + (StringUtils.isBlank(bases) ? "" : ","+bases),
+                "META_PROXY_URL=whatever",
+                "OPEN_FORMAT_URL=notUsed",
+                "MAX_PAGE_SIZE=5"
+        );
         Timer timer = mockTimer();
         ExternalSearchService essService = mock(ExternalSearchService.class);
-        essService.client = null;
         essService.timerRequest = timer;
         essService.timerSruRequest = timer;
         essService.timerSruReadResponse = timer;
         essService.executorService = mockExecutorService();
         essService.formatting = makeFormatting(docs);
-        essService.knownBases = Arrays.asList(bases.split(","));
+        essService.configuration = conf;
         doCallRealMethod().when(essService).requestCQL(anyString(), anyString(), anyInt(), anyInt(), anyString(), anyString());
         doCallRealMethod().when(essService).requestRPN(anyString(), anyString(), anyInt(), anyInt(), anyString(), anyString());
         doCallRealMethod().when(essService).serverError(anyString());

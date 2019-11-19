@@ -57,9 +57,9 @@ public class Formatting {
     private final Client client;
     private final Timer timerFormatRequest;
 
-    public Formatting(EssConfiguration configuration, MetricRegistry metrics, Client client) {
+    public Formatting(EssConfiguration configuration, MetricRegistry metrics) {
         openFormatUrl = configuration.getOpenFormatUrl();
-        this.client = client;
+        this.client = configuration.getClientBuilder().build();
         this.timerFormatRequest = mkTimer(metrics, "formatRequest");
     }
 
