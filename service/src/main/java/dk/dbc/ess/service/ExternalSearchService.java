@@ -113,11 +113,9 @@ public class ExternalSearchService {
         if (!configuration.getBases().contains(base)) {
             return serverError("Unknown base requested");
         }
-        log.info("base: " + base + "; format: " + format +
-                "; start: " + start + "; rows: " + rows +
-                "; trackingId: " + trackingId + "; query: " + query + "; type: " + (isRPN ? "rpn" : "cql"));
+        log.info("base: {}; format: {}; start: {}; rows: {}; trackingId: {}; query: {}; type: {}",
+                base, format, start, rows, trackingId, query, (isRPN ? "rpn" : "cql"));
 
-//        try (Timer.Context ignored = timerRequest.time()) {
         try {
             String queryParam = isRPN ? "x-pquery" : "query";
             Response response = requestSru(base, queryParam, query, start, rows);
