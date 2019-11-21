@@ -18,6 +18,9 @@
  */
 package dk.dbc.ess.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
 import javax.ejb.Startup;
@@ -26,9 +29,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
+
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -55,13 +56,12 @@ public class EssConfiguration  {
     private List<String> formats;
     private int maxPageSize;
     private List<String> bases;
-    private long jerseyTimeout;
-    private long jerseyConnectionTimeout;
 
     public EssConfiguration() {
         this.env = System.getenv();
     }
 
+    // for testing
     public EssConfiguration(String... params) {
         this.env = Arrays.stream(params)
                 .map(s -> s.split("=", 2))
@@ -77,9 +77,6 @@ public class EssConfiguration  {
         formats = getValue(props, env, "formats", "FORMATS", "netpunkt_standard", "No formats specified", s -> Arrays.asList(s.split(",")));
         maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "5", "", Integer::parseUnsignedInt);
         bases = getValue(props, env, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
-        jerseyTimeout = getValue(props, env, "jerseyTimeout", "JERSEY_TIMEOUT", "60", "No jersey timeout specified", Long::parseUnsignedLong);
-        jerseyConnectionTimeout = getValue(props, env, "jerseyConnectionTimeout", "JERSEY_CONNECTION_TIMEOUT",
-                "300", "No jersey connection timeout specified", Long::parseUnsignedLong);
     }
 
     public String getMetaProxyUrl() { return metaProxyUrl; }
@@ -87,8 +84,6 @@ public class EssConfiguration  {
     public List<String> getFormats() { return formats; }
     public int getMaxPageSize() { return maxPageSize; }
     public List<String> getBases() { return bases; }
-    public long getJerseyTimeout() { return jerseyTimeout; }
-    public long getJerseyConnectionTimeout() { return jerseyConnectionTimeout; }
 
     private static <T> T getValue(Properties props, Map<String, String> env, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
         return mapper.apply(getValue(props, env, propertyName, envName, defaultValue, error));
@@ -145,7 +140,7 @@ public class EssConfiguration  {
         return clientBuilder;
     }
 
-    Client getClient() {
+    protected Client getClient() {
         if (client == null) {
             client = getClientBuilder().build();
         }

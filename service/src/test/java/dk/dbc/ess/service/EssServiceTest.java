@@ -18,7 +18,6 @@
  */
 package dk.dbc.ess.service;
 
-import com.codahale.metrics.Timer;
 import dk.dbc.ess.service.response.EssResponse;
 import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
 import dk.dbc.xmldiff.XmlDiff;
@@ -129,11 +128,7 @@ public class EssServiceTest {
                 "OPEN_FORMAT_URL=notUsed",
                 "MAX_PAGE_SIZE=5"
         );
-        Timer timer = mockTimer();
         ExternalSearchService essService = mock(ExternalSearchService.class);
-        essService.timerRequest = timer;
-        essService.timerSruRequest = timer;
-        essService.timerSruReadResponse = timer;
         essService.executorService = mockExecutorService();
         essService.formatting = makeFormatting(docs);
         essService.configuration = conf;
@@ -167,12 +162,6 @@ public class EssServiceTest {
             stub = stub.then(i -> (Callable<Element>) ()-> stringToXMLObject(xml));
         }
         return formatting;
-    }
-
-    protected static Timer mockTimer() {
-        Timer timer = mock(Timer.class);
-        doReturn(mock(Timer.Context.class)).when(timer).time();
-        return timer;
     }
 
     protected static ExecutorService mockExecutorService() {

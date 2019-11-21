@@ -18,11 +18,10 @@
  */
 package dk.dbc.ess.service;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import dk.dbc.openformat.FormatRequest;
 import dk.dbc.openformat.FormatResponse;
 import dk.dbc.openformat.OriginalData;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -30,6 +29,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+
+import javax.ejb.Singleton;
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -48,23 +50,35 @@ import java.util.concurrent.Callable;
  *
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
+@Singleton
 public class Formatting {
     private static final Logger log = LoggerFactory.getLogger(Formatting.class);
 
-    public static final ErrorDocument ERROR_DOCUMENT = new ErrorDocument();
+    @Inject
+    public EssConfiguration configuration;
 
     private final String openFormatUrl;
     private final Client client;
-    private final Timer timerFormatRequest;
 
-    public Formatting(EssConfiguration configuration, MetricRegistry metrics) {
-        openFormatUrl = configuration.getOpenFormatUrl();
-        this.client = configuration.getClientBuilder().build();
-        this.timerFormatRequest = mkTimer(metrics, "formatRequest");
+    public Formatting() {
+        this.openFormatUrl = configuration.getOpenFormatUrl();
+        this.client = configuration.getClient();
     }
 
-    private Timer mkTimer(MetricRegistry metrics, String name) {
-        return metrics.timer(getClass().getCanonicalName() + "#" + name);
+    // for integration test
+    public Formatting(EssConfiguration conf) {
+        this.openFormatUrl = conf.getOpenFormatUrl();
+        this.client = conf.getClient();
+    }
+
+    public static final ErrorDocument ERROR_DOCUMENT = new ErrorDocument();
+
+    @Timed(name = "formatting-call-openFormat")
+    private static Response InvokeUrl(Client client, String openFormatUrl, FormatRequest request) {
+        Invocation invocation = client.target(openFormatUrl)
+                .request(MediaType.APPLICATION_XML_TYPE)
+                .buildPost(Entity.entity(request, MediaType.APPLICATION_XML_TYPE));
+        return invocation.invoke();
     }
 
     private Element format(Element in, String outputFormat, String id, String trackingId) {
@@ -76,10 +90,6 @@ public class Formatting {
             originalData.setIdentifier(id);
             originalData.setAny(in);
             request.getOriginalDatas().add(originalData);
-            Invocation invocation = client.target(openFormatUrl)
-                    .request(MediaType.APPLICATION_XML_TYPE)
-                    .buildPost(Entity.entity(request, MediaType.APPLICATION_XML_TYPE));
-
             if (log.isTraceEnabled()) {
                 StringWriter sw = new StringWriter();
                 try {
@@ -92,7 +102,7 @@ public class Formatting {
                 }
             }
 
-            Response response = timerFormatRequest.time(() -> invocation.invoke());
+            Response response = InvokeUrl(client, openFormatUrl, request);
             Response.StatusType status = response.getStatusInfo();
             log.debug("status = {}", status);
 

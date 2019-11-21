@@ -18,20 +18,18 @@
  */
 package dk.dbc.ess.service;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import dk.dbc.ess.service.response.EssResponse;
 import dk.dbc.sru.sruresponse.Record;
 import dk.dbc.sru.sruresponse.RecordXMLEscapingDefinition;
 import dk.dbc.sru.sruresponse.Records;
 import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -63,19 +61,9 @@ public class ExternalSearchService {
     @Inject
     public Formatting formatting;
 
-    @Inject
-    public MetricRegistry metrics;
-
     ExecutorService executorService;
-    Timer timerSruRequest;
-    Timer timerSruReadResponse;
-    Timer timerRequest;
 
-    @PostConstruct
-    public void init() {
-        this.timerSruRequest = makeTimer(metrics, "sruRequest");
-        this.timerSruReadResponse = makeTimer(metrics, "sruReadResponse");
-        this.timerRequest = makeTimer(metrics, "Request");
+    public ExternalSearchService() {
         this.executorService = Executors.newCachedThreadPool();
     }
 
@@ -205,6 +193,7 @@ public class ExternalSearchService {
         return Response.ok(essResponse, MediaType.APPLICATION_XML_TYPE).build();
     }
 
+    @Timed(name = "call-meta-proxy")
     Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
             throws Exception {
         Invocation invocation = configuration.getClient()
@@ -215,15 +204,12 @@ public class ExternalSearchService {
                 .queryParam("maximumRecords", stepValue)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .buildGet();
-        return timerSruRequest.time(invocation::invoke);
+        return invocation.invoke();
     }
 
+    @Timed(name = "read-response-entity")
     SearchRetrieveResponse responseSru(Response response) throws  Exception {
-        return  timerSruReadResponse.time(() -> response.readEntity(SearchRetrieveResponse.class));
-    }
-
-    private Timer makeTimer(MetricRegistry metricRegistry, String name) {
-        return metricRegistry.timer(getClass().getCanonicalName() + "#" + name);
+        return response.readEntity(SearchRetrieveResponse.class);
     }
 
     Response serverError(String message) {

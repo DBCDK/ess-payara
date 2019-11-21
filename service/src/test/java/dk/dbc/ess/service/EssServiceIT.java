@@ -18,7 +18,6 @@
  */
 package dk.dbc.ess.service;
 
-import com.codahale.metrics.MetricRegistry;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import dk.dbc.ess.service.response.EssResponse;
@@ -27,11 +26,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Element;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.function.Supplier;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static junit.framework.TestCase.assertEquals;
@@ -72,13 +73,10 @@ public class EssServiceIT {
                 return JerseyClientBuilder.newBuilder();
             }
         };
-        MetricRegistry metricsRegistry = new MetricRegistry();
         client = conf.getClient();
         essService = new ExternalSearchService();
         essService.configuration = conf;
-        essService.metrics = metricsRegistry;
-        essService.init();
-        essService.formatting = new Formatting(conf, metricsRegistry);
+        essService.formatting = new Formatting(conf);
     }
 
     @Test
