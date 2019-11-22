@@ -22,5 +22,8 @@ Et docker image kan også bygges ved at køre `mvn clean package`.
 Eksempel URL:
 `http://host:port/api/?base=bibsys&query=horse&start=&rows=1&format=netpunkt_standard&trackingId=`
  
+## Build docker image
+`cd service && docker build -f target/docker/Dockerfile .`
+ 
 ## Noter
  - Få OpenFormat endpoint der ikke fejler, deploy External Search Service med denne.
