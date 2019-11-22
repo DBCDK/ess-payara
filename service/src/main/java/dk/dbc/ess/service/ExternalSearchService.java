@@ -52,6 +52,7 @@ import java.util.concurrent.Future;
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
 @Stateless
+@Path("/")
 public class ExternalSearchService {
     private static final Logger log = LoggerFactory.getLogger(ExternalSearchService.class);
 

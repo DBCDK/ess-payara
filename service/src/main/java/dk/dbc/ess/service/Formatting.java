@@ -33,6 +33,7 @@ import org.xml.sax.SAXException;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -61,8 +63,21 @@ public class Formatting {
     private final Client client;
 
     public Formatting() {
-        this.openFormatUrl = configuration.getOpenFormatUrl();
-        this.client = configuration.getClient();
+        if (configuration != null) {
+            this.openFormatUrl = configuration.getOpenFormatUrl();
+            this.client = configuration.getClient();
+        }
+        else {
+            Map<String, String> env = System.getenv();
+            if (env.containsKey("OPEN_FORMAT_URL")) {
+                this.openFormatUrl = env.get("OPEN_FORMAT_URL");
+            }
+            else {
+                this.openFormatUrl = null;
+            }
+            this.client = ClientBuilder.newBuilder().build();
+        }
+
     }
 
     // for integration test

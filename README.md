@@ -23,7 +23,17 @@ Eksempel URL:
 `http://host:port/api/?base=bibsys&query=horse&start=&rows=1&format=netpunkt_standard&trackingId=`
  
 ## Build docker image
-`cd service && docker build -f target/docker/Dockerfile .`
+First build `.war` file with `mvn clean package` and then 
+
+`cd service && docker build -t ess-payara -f target/docker/Dockerfile .`
+
+(including the last period.)
+ 
+ ## Run docker image
+ 
+ Here is an example of a command to run the image - the values of the environment vars come from gitlab:
+ 
+ `docker run -e "META_PROXY_URL=http://pz2-p01.dbc.dk:9001/" -e "OPEN_FORMAT_URL=http://openformat-php-master.frontend-prod.svc.cloud.dbc.dk/server.php" -e "BASES=bibsys,OLUCWorldCat,ArticleFirst" -ti --net=host -e JAVA_OPTS="-Dhazelcast.rest.enabled=true" ess-payara`
  
 ## Noter
  - Få OpenFormat endpoint der ikke fejler, deploy External Search Service med denne.
