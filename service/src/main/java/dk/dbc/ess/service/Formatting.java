@@ -77,7 +77,6 @@ public class Formatting {
             }
             this.client = ClientBuilder.newBuilder().build();
         }
-
     }
 
     // for integration test
