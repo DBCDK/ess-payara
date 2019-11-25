@@ -116,7 +116,7 @@ public class ExternalSearchService {
 
             SearchRetrieveResponse sru = responseSru(response);
 
-            return buildResponse(sru, format, "base: ", trackingId);
+            return buildResponse(sru, format, base+":", trackingId);
 
         } catch (Exception ex) {
             log.error("Error Processing Response: " + ex.getMessage() + " for: " + trackingId);
@@ -160,7 +160,7 @@ public class ExternalSearchService {
                                     if (tag != null && zeroZeroOne.equals(tag.getNodeValue())) {
                                         Node id = child.getFirstChild();
                                         if (id.getNodeType() == Node.TEXT_NODE) {
-                                            remoteId = idPrefix + id.getNodeValue();
+                                            remoteId = idPrefix + id.getNodeValue().trim();
                                         }
                                         break;
                                     }
