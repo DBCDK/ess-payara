@@ -49,7 +49,6 @@ public class EssConfiguration  {
 
     private static final Logger log = LoggerFactory.getLogger(EssConfiguration.class);
     private final Map<String, String> env;
-    private ClientBuilder clientBuilder;
     private Client client;
     private String metaProxyUrl;
     private String openFormatUrl;
@@ -71,6 +70,7 @@ public class EssConfiguration  {
 
     @PostConstruct
     public void loadProperties() {
+        client = ClientBuilder.newBuilder().build();
         Properties props = findProperties("external-search-service");
         metaProxyUrl = getValue(props, env, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
         openFormatUrl = getValue(props, env, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
@@ -133,17 +133,7 @@ public class EssConfiguration  {
         return new Properties();
     }
 
-    protected ClientBuilder getClientBuilder() {
-        if (clientBuilder == null) {
-            clientBuilder = ClientBuilder.newBuilder();
-        }
-        return clientBuilder;
-    }
-
     protected Client getClient() {
-        if (client == null) {
-            client = getClientBuilder().build();
-        }
         return client;
     }
 

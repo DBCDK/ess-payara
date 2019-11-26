@@ -18,39 +18,72 @@
  */
 package dk.dbc.ess.service;
 
-import com.codahale.metrics.health.HealthCheck;
 import dk.dbc.ess.service.response.HowRuResponse;
-import java.util.Arrays;
-import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import java.net.URI;
 
 /**
  *
  * @author Noah Torp-Smith (nots@dbc.dk)
  */
 @Path("howru")
+@Stateless
 public class HowRU {
-    private final List<HealthCheck> checks;
 
-    public HowRU(HealthCheck... checks) {
-        this.checks = Arrays.asList(checks);
-    }
+    @Inject
+    EssConfiguration essConfiguration;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response howru() {
-        boolean ok = checks.parallelStream()
-                .allMatch(c -> c.execute().isHealthy());
-        if (ok) {
+        // check the two services that ESS communicates with.
+        String metaProxyUrl = essConfiguration.getMetaProxyUrl();
+        String openFormatUrl = essConfiguration.getOpenFormatUrl();
+        if (metaProxyUrlOk(metaProxyUrl) && openFormatUrlOk(openFormatUrl)) {
             return Response.ok(new HowRuResponse(null)).build();
-        } else {
-            return Response.status(INTERNAL_SERVER_ERROR).entity(new HowRuResponse("downstream error - check healthchecks on admin url")).build();
         }
+        return Response.serverError().build();
+    }
+
+    /**
+     * Calls the meta-proxy URL and verifies that the response has status 200 (OK)
+     * TODO: if metaproxy has some kind of status/howru/diagnostics endpoint, use that instead.
+     * @param url
+     * @return true iff the response has status 200
+     */
+    private boolean metaProxyUrlOk(String url) {
+        try {
+            URI uri = new URI(url);
+            Response r = essConfiguration.getClient().target(uri).request(MediaType.APPLICATION_XML_TYPE).get();
+            if (r.getStatus() == 200) {
+                return true;
+            }
+        } catch (Exception e) { }
+        return false;
+    }
+
+    /**
+     * Calls the specified openFormat URL with query param HowRU=HowRU and
+     * checks that we get the expected 200 OK status.
+     * @param url
+     * @return whether the openFormat service responds as expected.
+     */
+    private boolean openFormatUrlOk(String url) {
+        try {
+            URI uri = new URI(url);
+            Response r = essConfiguration.getClient().target(uri).queryParam("HowRU", "HowRU").request(MediaType.TEXT_PLAIN).get();
+            if (r.getStatus() == 200) {
+                return true;
+            }
+        } catch (Exception e) { }
+        return false;
     }
 
 }

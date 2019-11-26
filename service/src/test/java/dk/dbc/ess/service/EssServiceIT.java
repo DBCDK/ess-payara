@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.function.Supplier;
@@ -69,8 +68,8 @@ public class EssServiceIT {
                 "MAX_PAGE_SIZE=5"
         ) {
             @Override
-            protected ClientBuilder getClientBuilder() {
-                return JerseyClientBuilder.newBuilder();
+            protected Client getClient() {
+                return JerseyClientBuilder.newBuilder().build();
             }
         };
         client = conf.getClient();

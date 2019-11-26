@@ -69,7 +69,7 @@ public class ExternalSearchService {
     }
 
     @GET
-    @Path("rpn/")
+    @Path("rpn")
     public Response requestRPN(@QueryParam("base") @NotNull String base,
                                @QueryParam("query") @NotNull String query,
                                @QueryParam("start") Integer start,
