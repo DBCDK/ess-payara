@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
+    <zs:numberOfRecords>5</zs:numberOfRecords>
+    <zs:records>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>string</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                    <datafield tag="100" ind1=" " ind2=" ">
+                        <subfield code="a">HELLO</subfield>
+                    </datafield>
+                </record></zs:recordData>
+            <zs:recordPosition>1</zs:recordPosition>
+        </zs:record>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>string</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                    <datafield tag="100" ind1=" " ind2=" ">
+                        <subfield code="a">THERE</subfield>
+                    </datafield>
+                </record></zs:recordData>
+            <zs:recordPosition>2</zs:recordPosition>
+        </zs:record>
+    </zs:records>
+    <zs:nextRecordPosition>3</zs:nextRecordPosition>
+    <zs:echoedSearchRetrieveRequest>
+        <zs:version>2.0</zs:version>
+        <zs:query>whatever</zs:query>
+        <zs:maximumRecords>2</zs:maximumRecords>
+        <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+    </zs:echoedSearchRetrieveRequest>
+</zs:searchRetrieveResponse>
+

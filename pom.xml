@@ -16,10 +16,8 @@
         <relativePath/>
     </parent>
 
-    <properties>
-    </properties>
-
     <modules>
+        <module>service</module>
     </modules>
 
     <groupId>dk.dbc</groupId>

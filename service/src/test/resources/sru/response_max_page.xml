@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<zs:searchRetrieveResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse">
+    <zs:numberOfRecords>100</zs:numberOfRecords>
+    <zs:records>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                    <datafield tag="100" ind1=" " ind2=" ">
+                        <subfield code="a">One</subfield>
+                    </datafield>
+                </record></zs:recordData>
+            <zs:recordPosition>1</zs:recordPosition>
+        </zs:record>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                    <datafield tag="100" ind1=" " ind2=" ">
+                        <subfield code="a">Two</subfield>
+                    </datafield>
+                </record></zs:recordData>
+            <zs:recordPosition>2</zs:recordPosition>
+        </zs:record>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                <datafield tag="100" ind1=" " ind2=" ">
+                    <subfield code="a">Three</subfield>
+                </datafield>
+            </record></zs:recordData>
+            <zs:recordPosition>3</zs:recordPosition>
+        </zs:record>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                <datafield tag="100" ind1=" " ind2=" ">
+                    <subfield code="a">Four</subfield>
+                </datafield>
+            </record></zs:recordData>
+            <zs:recordPosition>4</zs:recordPosition>
+        </zs:record>
+        <zs:record>
+            <zs:recordSchema/>
+            <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+            <zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+                <datafield tag="100" ind1=" " ind2=" ">
+                    <subfield code="a">Five</subfield>
+                </datafield>
+            </record></zs:recordData>
+            <zs:recordPosition>5</zs:recordPosition>
+        </zs:record>
+    </zs:records>
+    <zs:nextRecordPosition>6</zs:nextRecordPosition>
+    <zs:echoedSearchRetrieveRequest>
+        <zs:version>2.0</zs:version>
+        <zs:query>whatever</zs:query>
+        <zs:maximumRecords>5</zs:maximumRecords>
+        <zs:recordXMLEscaping>xml</zs:recordXMLEscaping>
+    </zs:echoedSearchRetrieveRequest>
+</zs:searchRetrieveResponse>
+
