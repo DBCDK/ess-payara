@@ -18,18 +18,12 @@
  */
 package dk.dbc.ess.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  *
@@ -47,23 +41,6 @@ public class XmlTools {
         }
     }
 
-    public static Transformer newTransformer() {
-        try {
-            synchronized (TransformerFactory.class) {
-                log.info("Creating new transformerfactory");
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-                transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-                transformer.setOutputProperty(OutputKeys.INDENT, "no");
-                transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                return transformer;
-            }
-        } catch (TransformerFactoryConfigurationError | TransformerConfigurationException | IllegalArgumentException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     public static DocumentBuilder newDocumentBuilder() {
         try {
             synchronized (DBF) {
@@ -75,30 +52,4 @@ public class XmlTools {
         }
     }
 
-    public static void fixXmlNamespacePrefix(Element element, String metadataPrefix) {
-        String namespaceURI = element.getNamespaceURI();
-        if (namespaceURI == null) {
-            return;
-        }
-        fixXmlNamespacePrefix(element, metadataPrefix, namespaceURI);
-    }
-
-    private static void fixXmlNamespacePrefix(Element element, String metadataPrefix, String namespaceURI) {
-        String prefix = null;
-        if (namespaceURI.equals(element.getNamespaceURI())) {
-            prefix = element.getPrefix();
-            if (prefix == null) {
-                prefix = "";
-            }
-            element.setPrefix(metadataPrefix);
-        }
-        for (Node child = element.getFirstChild() ; child != null ; child = child.getNextSibling()) {
-            if (child.getNodeType() == Node.ELEMENT_NODE) {
-                fixXmlNamespacePrefix((Element) child, metadataPrefix, namespaceURI);
-            }
-        }
-        if (prefix != null) {
-            element.removeAttribute(prefix.isEmpty() ? "xmlns" :  "xmlns:" + prefix);
-        }
-    }
 }
