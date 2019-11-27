@@ -19,6 +19,8 @@
 package dk.dbc.ess.service;
 
 import dk.dbc.ess.service.response.HowRuResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -36,6 +38,8 @@ import java.net.URI;
 @Path("howru")
 @Stateless
 public class HowRU {
+
+    private static final Logger log = LoggerFactory.getLogger(HowRU.class);
 
     @Inject
     EssConfiguration essConfiguration;
@@ -66,6 +70,7 @@ public class HowRU {
                 return true;
             }
         } catch (Exception e) { }
+        log.error("Unexpected response from MetaProxy url {}", url);
         return false;
     }
 
@@ -83,6 +88,7 @@ public class HowRU {
                 return true;
             }
         } catch (Exception e) { }
+        log.error("Unexpected response from HowRU call to openFormat url: {}", url);
         return false;
     }
 
