@@ -39,7 +39,7 @@ public class HowRuResponse {
     public HowRuResponse() {
     }
 
-    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "part of response")
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public HowRuResponse(String error) {
         this.ok = error == null || error.isEmpty();
         this.message = this.ok ? null : error;

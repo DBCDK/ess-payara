@@ -126,7 +126,7 @@ public class ExternalSearchService {
         return serverError("Internal Server Error");
     }
 
-    @SuppressFBWarnings(value="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "part of response")
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
         throws InterruptedException, ExecutionException {
         final String controlField = "controlfield";
