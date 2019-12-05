@@ -69,7 +69,10 @@ public class HowRU {
             if (r.getStatus() == 200) {
                 return true;
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            log.error("Exception occurred when calling MetaProxy url {}: {}", url, e);
+            return false;
+        }
         log.error("Unexpected response from MetaProxy url {}", url);
         return false;
     }
@@ -87,7 +90,10 @@ public class HowRU {
             if (r.getStatus() == 200) {
                 return true;
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            log.error("Exception occurred in HowRU call to openFormat url: {}: {}", url, e);
+            return false;
+        }
         log.error("Unexpected response from HowRU call to openFormat url: {}", url);
         return false;
     }

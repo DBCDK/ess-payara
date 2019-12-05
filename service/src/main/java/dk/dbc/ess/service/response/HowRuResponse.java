@@ -18,6 +18,8 @@
  */
 package dk.dbc.ess.service.response;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -37,6 +39,7 @@ public class HowRuResponse {
     public HowRuResponse() {
     }
 
+    @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "part of response")
     public HowRuResponse(String error) {
         this.ok = error == null || error.isEmpty();
         this.message = this.ok ? null : error;
