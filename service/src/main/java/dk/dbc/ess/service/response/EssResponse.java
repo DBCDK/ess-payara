@@ -18,11 +18,13 @@
  */
 package dk.dbc.ess.service.response;
 
-import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  *
@@ -33,6 +35,7 @@ public class EssResponse {
 
     public static final String NS = "info:ESSv0";
 
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     @XmlElement(required = true, namespace = NS)
     public long hits;
 
@@ -40,6 +43,7 @@ public class EssResponse {
     @XmlAnyElement(lax = true)
     public List<Object> records;
 
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     @XmlElement(name = "trackingId", required = true, namespace = NS)
     public String trackingId;
 }
