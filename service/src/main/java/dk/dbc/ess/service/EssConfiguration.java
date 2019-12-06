@@ -75,7 +75,7 @@ public class EssConfiguration  {
         metaProxyUrl = getValue(props, env, "metaProxyUrl", "META_PROXY_URL", null, "No meta proxy URL found");
         openFormatUrl = getValue(props, env, "openFormatUrl", "OPEN_FORMAT_URL", null, "No OpenFormat URL found");
         formats = getValue(props, env, "formats", "FORMATS", "netpunkt_standard", "No formats specified", s -> Arrays.asList(s.split(",")));
-        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "5", "", Integer::parseUnsignedInt);
+        maxPageSize = getValue(props, env, "maxPageSize", "MAX_PAGE_SIZE", "25", "", Integer::parseUnsignedInt);
         bases = getValue(props, env, "bases", "BASES", null, "No bases provided", s -> Arrays.asList(s.split(",")));
     }
 
