@@ -129,6 +129,7 @@ public class ExternalSearchService {
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
         throws InterruptedException, ExecutionException {
+        log.debug("entering buildResponse...");
         final String controlField = "controlfield";
         final String zeroZeroOne = "001";
 
@@ -199,6 +200,7 @@ public class ExternalSearchService {
     @Timed(name = "call-meta-proxy")
     Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
             throws Exception {
+        log.debug("entering requestSru...");
         Invocation invocation = configuration.getClient()
                 .target(configuration.getMetaProxyUrl())
                 .path(base)
@@ -212,6 +214,7 @@ public class ExternalSearchService {
 
     @Timed(name = "read-response-entity")
     SearchRetrieveResponse responseSru(Response response) throws  Exception {
+        log.debug("entering responseSru...");
         return response.readEntity(SearchRetrieveResponse.class);
     }
 
