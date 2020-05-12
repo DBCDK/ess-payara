@@ -41,7 +41,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -148,7 +147,7 @@ public class ExternalSearchService {
     }
 
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
-    Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
+    Response buildResponse(SearchRetrieveResponse sru, String outputFormat, String idPrefix, String trackingId)
         throws InterruptedException, ExecutionException {
         final String controlField = "controlfield";
         final String zeroZeroOne = "001";
@@ -202,7 +201,7 @@ public class ExternalSearchService {
                             if (remoteId == null) {
                                 remoteId = idPrefix + UUID.randomUUID().toString();
                             }
-                            future = executorService.submit(formatting.formattingCall(e, output, remoteId, trackingId));
+                            future = executorService.submit(formatting.formattingCall(e, outputFormat, remoteId, trackingId));
                         }
                         else {
                             log.error("Not of type XML: " + obj.getClass().getCanonicalName() + ". This should not happen.");
@@ -238,19 +237,9 @@ public class ExternalSearchService {
                 .queryParam("maximumRecords", stepValue)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .buildGet();
-        try {
-            Response res =  invocation.invoke();
-            log.debug("Response from Metaproxy was: " + res);
-            return res;
-        }
-        catch (ResponseProcessingException rpe) {
-            log.error("Call to Metaproxy resulted in ResponseProcessingException", rpe);
-            throw rpe;
-        }
-        catch (ProcessingException pe) {
-            log.error("Call to Metaproxy resulted in ProcessingException", pe);
-            throw pe;
-        }
+        Response res =  invocation.invoke();
+        log.debug("Response from MetaProxy was: " + res);
+        return res;
     }
 
     @Timed(name = "read-response-entity")
