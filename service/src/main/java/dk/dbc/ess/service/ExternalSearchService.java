@@ -124,7 +124,6 @@ public class ExternalSearchService {
                 Diagnostics sruDiagnostics = sru.getDiagnostics();
                 List<Diagnostic> diagList = sruDiagnostics.getDiagnostics();
                 StringBuilder details = new StringBuilder();
-                StringBuilder messages = new StringBuilder();
                 for (Diagnostic d: diagList) {
                     details.append(d.getDetails());
                     log.error("Error encountered in SRU response (details): " + d.getDetails());
