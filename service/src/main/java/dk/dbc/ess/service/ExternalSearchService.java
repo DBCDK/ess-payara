@@ -19,6 +19,8 @@
 package dk.dbc.ess.service;
 
 import dk.dbc.ess.service.response.EssResponse;
+import dk.dbc.sru.diagnostic.Diagnostic;
+import dk.dbc.sru.sruresponse.Diagnostics;
 import dk.dbc.sru.sruresponse.Record;
 import dk.dbc.sru.sruresponse.RecordXMLEscapingDefinition;
 import dk.dbc.sru.sruresponse.Records;
@@ -36,8 +38,10 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -117,6 +121,23 @@ public class ExternalSearchService {
 
             SearchRetrieveResponse sru = responseSru(response);
 
+            try { // metaProxy can return a 200 OK response with error messages in it, so we check for "Diagnostics"
+                Diagnostics sruDiagnostics = sru.getDiagnostics();
+                List<Diagnostic> diagList = sruDiagnostics.getDiagnostics();
+                StringBuilder details = new StringBuilder();
+                StringBuilder messages = new StringBuilder();
+                for (Diagnostic d: diagList) {
+                    details.append(d.getDetails());
+                    log.error("Error encountered in SRU response (details): " + d.getDetails());
+                    log.error("Error encountered in SRU response (message): " + d.getMessage());
+                }
+                Response.ResponseBuilder rb = Response.status(Response.Status.BAD_GATEWAY);
+                rb.entity(details.toString());
+                return rb.build();
+            } catch (NullPointerException dnpe) {
+                // no diagnostics found, carry on...
+            }
+
             return buildResponse(sru, format, base+":", trackingId);
 
         } catch (Exception ex) {
@@ -129,15 +150,25 @@ public class ExternalSearchService {
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     Response buildResponse(SearchRetrieveResponse sru, String output, String idPrefix, String trackingId)
         throws InterruptedException, ExecutionException {
-        log.trace("entering buildResponse...");
         final String controlField = "controlfield";
         final String zeroZeroOne = "001";
-
         EssResponse essResponse = new EssResponse();
-        essResponse.hits = sru.getNumberOfRecords();
         essResponse.records = new ArrayList<>();
         essResponse.trackingId = trackingId;
-        Records recs = sru.getRecords();
+        Records recs = null;
+
+        try {
+            Long hits = sru.getNumberOfRecords();
+            log.debug("Number of records read was: " + hits.toString());
+            essResponse.hits = sru.getNumberOfRecords();
+            recs = sru.getRecords();
+        } catch (NullPointerException npe) {
+            log.error("Error reading record data from SearchRetrieveResponse", npe);
+            Response.ResponseBuilder rb = Response.status(Response.Status.BAD_GATEWAY);
+            rb.entity("Error extracting records from MetaProxy response");
+            return rb.build();
+        }
+
         if (recs != null) {
             List<Record> recordList = recs.getRecords();
             List<Future<Element>> futures = new ArrayList<>(recordList.size());
@@ -199,7 +230,6 @@ public class ExternalSearchService {
     @Timed(name = "call-meta-proxy")
     Response requestSru(String base, String queryParam, String query, Integer start, Integer stepValue)
             throws Exception {
-        log.trace("entering requestSru...");
         Invocation invocation = configuration.getClient()
                 .target(configuration.getMetaProxyUrl())
                 .path(base)
@@ -208,13 +238,31 @@ public class ExternalSearchService {
                 .queryParam("maximumRecords", stepValue)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .buildGet();
-        return invocation.invoke();
+        try {
+            Response res =  invocation.invoke();
+            log.debug("Response from Metaproxy was: " + res);
+            return res;
+        }
+        catch (ResponseProcessingException rpe) {
+            log.error("Call to Metaproxy resulted in ResponseProcessingException", rpe);
+            throw rpe;
+        }
+        catch (ProcessingException pe) {
+            log.error("Call to Metaproxy resulted in ProcessingException", pe);
+            throw pe;
+        }
     }
 
     @Timed(name = "read-response-entity")
-    SearchRetrieveResponse responseSru(Response response) throws  Exception {
-        log.trace("entering responseSru...");
-        return response.readEntity(SearchRetrieveResponse.class);
+    SearchRetrieveResponse responseSru(Response response) throws Exception {
+        try {
+            SearchRetrieveResponse res = response.readEntity(SearchRetrieveResponse.class);
+            return res;
+        }
+        catch (ProcessingException pe) {
+            log.error("Error when processing SearchRetrieveResponse: ", pe);
+            throw pe;
+        }
     }
 
     Response serverError(String message) {
