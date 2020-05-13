@@ -170,6 +170,7 @@ public class ExternalSearchService {
         if (recs != null) {
             List<Record> recordList = recs.getRecords();
             List<Future<Element>> futures = new ArrayList<>(recordList.size());
+            log.debug("Sending records to OpenFormat...");
             for (Record record : recordList) {
                 Future<Element> future;
                 RecordXMLEscapingDefinition esc = record.getRecordXMLEscaping();
@@ -221,6 +222,7 @@ public class ExternalSearchService {
             for (Future<Element> f : futures) {
                 essResponse.records.add(f.get());
             }
+            log.debug("All records returned from OpenFormat...");
         }
         return Response.ok(essResponse, MediaType.APPLICATION_XML_TYPE).build();
     }
@@ -236,6 +238,7 @@ public class ExternalSearchService {
                 .queryParam("maximumRecords", stepValue)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .buildGet();
+        log.debug("Sending request to MetaProxy...");
         Response res =  invocation.invoke();
         log.debug("Response from MetaProxy was: " + res);
         return res;
