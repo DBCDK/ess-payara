@@ -132,9 +132,8 @@ public class ExternalSearchService {
                 Response.ResponseBuilder rb = Response.status(Response.Status.BAD_GATEWAY);
                 rb.entity(details.toString());
                 return rb.build();
-            } catch (NullPointerException dnpe) {
-                // no diagnostics found, carry on...
-            }
+            } catch (NullPointerException dnpe) { } //NOPMD
+            // no diagnostics is a good thing, carry on...
 
             return buildResponse(sru, format, base+":", trackingId);
 
