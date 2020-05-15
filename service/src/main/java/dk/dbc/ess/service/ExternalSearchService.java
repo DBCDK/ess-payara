@@ -247,11 +247,10 @@ public class ExternalSearchService {
     @Timed(name = "read-response-entity")
     SearchRetrieveResponse responseSru(Response response) throws Exception {
         try {
-            SearchRetrieveResponse res = response.readEntity(SearchRetrieveResponse.class);
-            return res;
+            return response.readEntity(SearchRetrieveResponse.class);
         }
         catch (ProcessingException pe) {
-            log.error("Error when processing SearchRetrieveResponse: ", pe);
+            log.error("Error when reading entity SearchRetrieveResponse from response");
             throw pe;
         }
     }
