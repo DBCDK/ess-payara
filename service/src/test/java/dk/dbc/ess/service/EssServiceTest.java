@@ -23,11 +23,11 @@ import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
 import dk.dbc.xmldiff.XmlDiff;
 import dk.dbc.xmldiff.XmlDiffTextWriter;
 import dk.dbc.xmldiff.XmlDiffWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import wiremock.org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
@@ -46,9 +46,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyInt;
 
 /**
  *
