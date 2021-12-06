@@ -47,6 +47,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -75,7 +76,9 @@ public class Formatting {
             else {
                 this.openFormatUrl = null;
             }
-            this.client = ClientBuilder.newBuilder().build();
+            this.client = ClientBuilder.newBuilder()
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS).build();
         }
     }
 
