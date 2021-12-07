@@ -52,18 +52,14 @@ import static org.junit.Assert.assertNotEquals;
 public class EssServiceIT {
 
     private EssConfiguration conf;
-    private Client client;
     private ExternalSearchService essService;
 
     private final int readTimeout = 1500;              // ms
     private final int fixedDelay  = readTimeout + 500; // ms
 
-    public EssServiceIT() {}
-    private final int wireMockPort = Integer.parseInt(System.getProperty("wiremock.port"));
-
     @Rule
     public WireMockRule wireMockRule = ((Supplier<WireMockRule>)()-> {
-        WireMockRule wireMockRule = new WireMockRule(wireMockConfig().port(wireMockPort));
+        WireMockRule wireMockRule = new WireMockRule(wireMockConfig().port(0));
         wireMockRule.start();
         return wireMockRule;
     }).get();
@@ -81,7 +77,6 @@ public class EssServiceIT {
                 return JerseyClientBuilder.newBuilder().build();
             }
         };
-        client = conf.getClient();
         essService = new ExternalSearchService();
         essService.configuration = conf;
         essService.formatting = new Formatting(conf);
@@ -89,6 +84,7 @@ public class EssServiceIT {
 
     @Test
     public void essServiceBaseFoundTest() throws Exception {
+        System.out.println("essServiceBaseFoundTest");
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -101,6 +97,7 @@ public class EssServiceIT {
 
     @Test
     public void essServiceBaseInternalErrorTest() throws Exception {
+        System.out.println("essServiceBaseInternalErrorTest");
         stubFor(get(urlMatching("/bibsys.*"))
                 .willReturn(aResponse()
                         .withStatus(500)
@@ -112,6 +109,7 @@ public class EssServiceIT {
 
     @Test
     public void essServiceBaseNotFoundTest() throws Exception {
+        System.out.println("essServiceBaseNotFoundTest");
         stubFor(get(urlMatching(".*dog.*"))
                 .willReturn(aResponse()
                         .withStatus(404)));
@@ -122,6 +120,7 @@ public class EssServiceIT {
 
     @Test
     public void bibsysRespondingOKTest() throws Exception {
+        System.out.println("bibsysRespondingOKTest");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -152,6 +151,7 @@ public class EssServiceIT {
 
     @Test
     public void bibsysRPNRespondingOKTest() throws Exception {
+        System.out.println("bibsysRPNRespondingOKTest");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?x-pquery=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -182,6 +182,7 @@ public class EssServiceIT {
 
     @Test
     public void openFormat404Test() throws Exception {
+        System.out.println("openFormat404Test");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -211,8 +212,9 @@ public class EssServiceIT {
         assertEquals("#text",e.getFirstChild().getNodeName()); // todo: had to change this here and below!
     }
 
-    @Test
+    @Test(timeout = 20_000L)
     public void openFormatConnectionFailed() {
+        System.out.println("openFormatConnectionFailed");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -228,7 +230,7 @@ public class EssServiceIT {
                 // Check the correct format is requested
                 .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
                 .willReturn(aResponse()
-                        .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+                        .withFault(Fault.EMPTY_RESPONSE)));
 
         Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
         EssResponse r = (EssResponse) response.getEntity();
@@ -242,6 +244,7 @@ public class EssServiceIT {
 
     @Test
     public void openFormatConnectionTimeout(){
+        System.out.println("openFormatConnectionTimeout");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -275,6 +278,7 @@ public class EssServiceIT {
     // TODO Maybe move this test over to positive tests?
     @Test
     public void openFormatTrakcingIdPassed(){
+        System.out.println("openFormatTrakcingIdPassed");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -304,6 +308,7 @@ public class EssServiceIT {
 
     @Test
     public void openFormatEmptyResponse(){
+        System.out.println("openFormatEmptyResponse");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -334,6 +339,7 @@ public class EssServiceIT {
 
     @Test
     public void openFormatFormatErrorResponse(){
+        System.out.println("openFormatFormatErrorResponse");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -364,6 +370,7 @@ public class EssServiceIT {
 
     @Test
     public void baseSearchGarbledEscapingErrorResponse(){
+        System.out.println("baseSearchGarbledEscapingErrorResponse");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -394,6 +401,7 @@ public class EssServiceIT {
 
     @Test
     public void baseSearchDuplicateRecordsErrorResponse(){
+        System.out.println("baseSearchDuplicateRecordsErrorResponse");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -424,6 +432,7 @@ public class EssServiceIT {
 
     @Test
     public void externalBaseNotReturningOKTest() throws Exception {
+        System.out.println("externalBaseNotReturningOKTest");
         givenThat(get(urlMatching(".*query=horse.*"))
                 .willReturn(aResponse()
                         .withStatus(404)
@@ -439,6 +448,7 @@ public class EssServiceIT {
 
     @Test
     public void externalBaseTimeoutTest() {
+        System.out.println("externalBaseTimeoutTest");
         // Testing Read-timeout for different bases
         stubFor(get(urlMatching("/.*?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -457,6 +467,7 @@ public class EssServiceIT {
 
     @Test
     public void baseNotValidTest() throws Exception {
+        System.out.println("baseNotValidTest");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
@@ -471,6 +482,7 @@ public class EssServiceIT {
 
     @Test
     public void maxPageSizeProperMetaRequest() throws Exception {
+        System.out.println("maxPageSizeProperMetaRequest");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=5")) // todo: had to alter this!
                 .willReturn(aResponse()
@@ -493,6 +505,7 @@ public class EssServiceIT {
 
     @Test
     public void maxPageSizeDefaultToMax() throws Exception {
+        System.out.println("maxPageSizeDefaultToMax");
         // Stubbing request to base
         stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=" + conf.getMaxPageSize()))
                 .willReturn(aResponse()
