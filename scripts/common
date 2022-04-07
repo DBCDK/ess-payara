@@ -15,9 +15,9 @@ getMyIP() {
 
 # build and test run values
 PORT=${PORT:-8080}
-DOCKER_NAMESPACE=docker-de.artifacts.dbccloud.dk
+DOCKER_REGISTRY=docker-de.artifacts.dbccloud.dk
 DOCKER_NAME=ess-payara-service
-DOCKER_REPOSITORY=${DOCKER_NAMESPACE}/${DOCKER_NAME}
+DOCKER_REPOSITORY=${DOCKER_REGISTRY}/${DOCKER_NAME}
 
 # app values
 ESS_DB_URL=${ESS_DB_URL:-"${USER}:${USER}@$(getMyIP):5432/ess_db"}
