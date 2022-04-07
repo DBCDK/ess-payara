@@ -2,7 +2,7 @@ CREATE TABLE usage_log (
     database_id     TEXT NOT NULL,
     client_id       TEXT,
     agency_id       TEXT,
-    record_count    INTEGER NOT NULL,
+    record_count    INTEGER NOT NULL CHECK(record_count >= 0),
     logged_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

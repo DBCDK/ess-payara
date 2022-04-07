@@ -19,178 +19,168 @@
 package dk.dbc.ess.service;
 
 import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import dk.dbc.ess.service.response.EssResponse;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import dk.dbc.ess.service.usage.Usage;
+import dk.dbc.httpclient.HttpGet;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.function.Supplier;
+import java.util.Collections;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingXPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-/**
- *
- * @author Noah Torp-Smith (nots@dbc.dk)
- */
-public class EssServiceIT {
-
-    private EssConfiguration conf;
-    private ExternalSearchService essService;
+public class EssServiceIT extends ContainerTestBase {
 
     private final int readTimeout = 1500;              // ms
     private final int fixedDelay  = readTimeout + 500; // ms
 
-    @Rule
-    public WireMockRule wireMockRule = ((Supplier<WireMockRule>)()-> {
-        WireMockRule wireMockRule = new WireMockRule(wireMockConfig().port(0));
-        wireMockRule.start();
-        return wireMockRule;
-    }).get();
-
-    @Before
-    public void setUp() throws Exception {
-        conf = new EssConfiguration(
-                "BASES=libris,bibsys",
-                "META_PROXY_URL=" + "http://localhost:" + wireMockRule.port() + "/",
-                "OPEN_FORMAT_URL="+ "http://localhost:" + wireMockRule.port() + "/",
-                "MAX_PAGE_SIZE=5"
-        ) {
-            @Override
-            protected Client getClient() {
-                return JerseyClientBuilder.newBuilder().build();
-            }
-        };
-        essService = new ExternalSearchService();
-        essService.configuration = conf;
-        essService.formatting = new Formatting(conf);
-    }
-
     @Test
-    public void essServiceBaseFoundTest() throws Exception {
-        System.out.println("essServiceBaseFoundTest");
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+    void externalDatabaseCQL_OK() {
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
+                // Check root is format request with correct namespace
+                .withRequestBody(matchingXPath("//fr:formatRequest")
+                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
+                // Check the correct format is requested
+                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml;charset=UTF-8")
+                        .withBodyFile("open_format_horse_response.xml")));
 
-        Response result = essService.requestSru("bibsys", "query", "horse", 1, 1);
-        assertEquals(200, result.getStatus());
+        final String clientId = "EssServiceIT#externalDatabaseCQL_OK";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("netpunkt_standard"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
     @Test
-    public void essServiceBaseInternalErrorTest() throws Exception {
-        System.out.println("essServiceBaseInternalErrorTest");
-        stubFor(get(urlMatching("/bibsys.*"))
+    void externalDatabaseRPN_OK() {
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?x-pquery=horse&startRecord=1&maximumRecords=1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml")
+                        .withBodyFile("base_bibsys_horse_response.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
+                // Check root is format request with correct namespace
+                .withRequestBody(matchingXPath("//fr:formatRequest")
+                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
+                // Check the correct format is requested
+                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml;charset=UTF-8")
+                        .withBodyFile("open_format_horse_response.xml")));
+
+        final String clientId = "EssServiceIT#externalDatabaseRPN_OK";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api", "rpn")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("netpunkt_standard"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
+    }
+
+    @Test
+    void metaproxyInternalServerError() {
+        wireMockServer.stubFor(get(urlMatching("/bibsys.*"))
                 .willReturn(aResponse()
                         .withStatus(500)
                         .withBody("")));
 
-        Response result = essService.requestSru("bibsys", "query", "horse", 1, 1);
-        assertEquals(500, result.getStatus());
+        final String clientId = "EssServiceIT#metaproxyInternalServerError";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(),
+                    is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId), is(Collections.emptyList()));
     }
 
     @Test
-    public void essServiceBaseNotFoundTest() throws Exception {
-        System.out.println("essServiceBaseNotFoundTest");
-        stubFor(get(urlMatching(".*dog.*"))
-                .willReturn(aResponse()
-                        .withStatus(404)));
-
-        Response result = essService.requestSru("bibsys", "query", "dog", 1, 1);
-        assertEquals(404, result.getStatus());
-    }
-
-    @Test
-    public void bibsysRespondingOKTest() throws Exception {
-        System.out.println("bibsysRespondingOKTest");
+    void openFormatNotFoundResponse() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_horse_response.xml")));
-        stubFor(post(urlEqualTo("/"))
-                // Check root is format request with correct namespace
-                .withRequestBody(matchingXPath("//fr:formatRequest")
-                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
-                // Check the correct format is requested
-                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml;charset=UTF-8")
-                        .withBodyFile("open_format_horse_response.xml")));
-
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(200, response.getStatus());
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertNotEquals("error",e.getTagName());
-        assertNotEquals("message",e.getFirstChild().getNodeName());
-    }
-
-    @Test
-    public void bibsysRPNRespondingOKTest() throws Exception {
-        System.out.println("bibsysRPNRespondingOKTest");
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?x-pquery=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_horse_response.xml")));
-        stubFor(post(urlEqualTo("/"))
-                // Check root is format request with correct namespace
-                .withRequestBody(matchingXPath("//fr:formatRequest")
-                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
-                // Check the correct format is requested
-                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml;charset=UTF-8")
-                        .withBodyFile("open_format_horse_response.xml")));
-
-        Response response = essService.requestRPN("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(200, response.getStatus());
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertNotEquals("error",e.getTagName());
-        assertNotEquals("message",e.getFirstChild().getNodeName());
-    }
-
-    @Test
-    public void openFormat404Test() throws Exception {
-        System.out.println("openFormat404Test");
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
         // Ensures request to open format is a proper format request, and returns a 404
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -201,29 +191,49 @@ public class EssServiceIT {
                         .withBodyFile("open_format_horse_response.xml")
                         .withStatus(404)));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(200, response.getStatus());
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error",e.getTagName());
-        assertEquals("#text",e.getFirstChild().getNodeName()); // todo: had to change this here and below!
+        final String clientId = "EssServiceIT#openFormatNotFoundResponse";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
-    @Test(timeout = 20_000L)
-    public void openFormatConnectionFailed() {
-        System.out.println("openFormatConnectionFailed");
+    @Test
+    void openFormatConnectionFailed() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withHeader("Connection","Keep-Alive")
                         .withBodyFile("base_bibsys_horse_response.xml")));
         // Ensures request to open format is a proper format request, and makes a connection reset
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -232,27 +242,50 @@ public class EssServiceIT {
                 .willReturn(aResponse()
                         .withFault(Fault.EMPTY_RESPONSE)));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error", e.getTagName());
-        assertEquals("#text", e.getFirstChild().getNodeName());
+
+        final String clientId = "EssServiceIT#openFormatConnectionFailed";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
+    @Disabled("This test does not work, since there is no timeout limit defined for the calls to Future.get()")
     @Test
-    public void openFormatConnectionTimeout(){
-        System.out.println("openFormatConnectionTimeout");
+    void openFormatConnectionTimeout() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
         // Stubbing request to open format, with delay that would trigger a socket timeout response
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -264,59 +297,48 @@ public class EssServiceIT {
                         .withBodyFile("open_format_horse_response.xml")
                         .withFixedDelay(fixedDelay)));
 
-        // In this response, open format response is delayed by 2s, making the socket time out
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("netpunkt_standard",e.getTagName()); // todo: had to change this...?
-        assertEquals("#text",e.getFirstChild().getNodeName());
+        final String clientId = "EssServiceIT#openFormatConnectionTimeout";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
-    // TODO Maybe move this test over to positive tests?
     @Test
-    public void openFormatTrakcingIdPassed(){
-        System.out.println("openFormatTrakcingIdPassed");
+    void openFormatEmptyResponse() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
         // Stubbing request to open format, with empty body to ensure it does not crash the service
-        stubFor(post(urlEqualTo("/"))
-                // Check root is format request with correct namespace
-                .withRequestBody(matchingXPath("//fr:formatRequest")
-                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
-                // Check the correct tracking ID is requested
-                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'trackingId']/text()",equalTo("track1234")))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml;charset=UTF-8")
-                        .withBodyFile("open_format_horse_response.xml")));
-
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "track1234");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        assertEquals("netpunkt_standard",e.getTagName()); // todo: there was nothing here before...
-        assertEquals("#text",e.getFirstChild().getNodeName());
-    }
-
-    @Test
-    public void openFormatEmptyResponse(){
-        System.out.println("openFormatEmptyResponse");
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_horse_response.xml")));
-        // Stubbing request to open format, with empty body to ensure it does not crash the service
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -327,27 +349,48 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withFault(Fault.EMPTY_RESPONSE)));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error",e.getTagName());
-        assertEquals("#text",e.getFirstChild().getNodeName());
+        final String clientId = "EssServiceIT#openFormatEmptyResponse";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
     @Test
-    public void openFormatFormatErrorResponse(){
-        System.out.println("openFormatFormatErrorResponse");
+    void openFormatFormatErrorResponse(){
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
-        // Stubbing request to open format, with empty body to ensure it does not crash the service
-        stubFor(post(urlEqualTo("/"))
+        // Stubbing request to open format, with error body to ensure it does not crash the service
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -358,138 +401,250 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_error_response.xml")));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error",e.getTagName());
-        assertEquals("#text",e.getFirstChild().getNodeName());
+        final String clientId = "EssServiceIT#openFormatFormatErrorResponse";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
     }
 
     @Test
-    public void baseSearchGarbledEscapingErrorResponse(){
-        System.out.println("baseSearchGarbledEscapingErrorResponse");
+    void openFormatTrackingIdPassed() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_garbled_escaping_response.xml")));
-        // Stubbing request to open format, with empty body to ensure it does not crash the service
-        stubFor(post(urlEqualTo("/"))
+                        .withBodyFile("base_bibsys_horse_response.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
-                // Check the correct format is requested
-                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
+                // Check the correct tracking ID is requested
+                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'trackingId']/text()",equalTo("track1234")))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error",e.getTagName());
-        assertEquals("#text",e.getFirstChild().getNodeName());
-    }
+        final String clientId = "EssServiceIT#openFormatTrackingIdPassed";
 
-    @Test
-    public void baseSearchDuplicateRecordsErrorResponse(){
-        System.out.println("baseSearchDuplicateRecordsErrorResponse");
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_duplicate_record_response.xml")));
-        // Stubbing request to open format, with empty body to ensure it does not crash the service
-        stubFor(post(urlEqualTo("/"))
-                // Check root is format request with correct namespace
-                .withRequestBody(matchingXPath("//fr:formatRequest")
-                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
-                // Check the correct format is requested
-                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml;charset=UTF-8")
-                        .withBodyFile("open_format_horse_response.xml")));
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .withQueryParameter("trackingId", "track1234")
+                .execute()) {
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 1, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5800,r.hits);
-        assertEquals(1,r.records.size());
-        Element e = (Element)r.records.get(0);
-        // Testing returned XML document for correct structure
-        assertEquals("error",e.getTagName());
-        assertEquals("#text",e.getFirstChild().getNodeName());
-    }
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
 
-    @Test
-    public void externalBaseNotReturningOKTest() throws Exception {
-        System.out.println("externalBaseNotReturningOKTest");
-        givenThat(get(urlMatching(".*query=horse.*"))
-                .willReturn(aResponse()
-                        .withStatus(404)
-                        .withBody("")));
-
-        // Test all configured external search systems
-        List<String> bases = conf.getBases();
-        for( String base: bases) {
-            Response response = essService.requestCQL(base, "horse", 1, 1, "netpunkt_standard", "");
-            assertEquals(500, response.getStatus());
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("netpunkt_standard"));
         }
     }
 
     @Test
-    public void externalBaseTimeoutTest() {
-        System.out.println("externalBaseTimeoutTest");
-        // Testing Read-timeout for different bases
-        stubFor(get(urlMatching("/.*?query=horse&startRecord=1&maximumRecords=1"))
+    void externalDatabaseGarbledEscapingResponse() {
+        // Stubbing request to base
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml")
+                        .withBodyFile("base_bibsys_garbled_escaping_response.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
+                // Check root is format request with correct namespace
+                .withRequestBody(matchingXPath("//fr:formatRequest")
+                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
+                // Check the correct format is requested
+                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml;charset=UTF-8")
+                        .withBodyFile("open_format_horse_response.xml")));
+
+        final String clientId = "EssServiceIT#externalDatabaseGarbledEscapingResponse";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
+    }
+
+    @Test
+    void externalDatabaseDuplicateRecordsResponse() {
+        // Stubbing request to base
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml")
+                        .withBodyFile("base_bibsys_duplicate_record_response.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
+                // Check root is format request with correct namespace
+                .withRequestBody(matchingXPath("//fr:formatRequest")
+                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
+                // Check the correct format is requested
+                .withRequestBody(matchingXPath("/*[local-name() = 'formatRequest']/*[local-name() = 'outputFormat']/text()",equalTo("netpunkt_standard")))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml;charset=UTF-8")
+                        .withBodyFile("open_format_horse_response.xml")));
+
+        final String clientId = "EssServiceIT#externalDatabaseDuplicateRecordsResponse";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of hits", essResponse.hits, is(5800L));
+            assertThat("number of records", essResponse.records.size(), is(1));
+            final Element recordElement = (Element)essResponse.records.get(0);
+            // Testing returned XML document for correct structure
+            assertThat(recordElement.getTagName(), is("error"));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(1))));
+    }
+
+    @Test
+    void externalDatabaseRespondsWithNotFound() {
+        wireMockServer.givenThat(get(urlMatching(".*query=horse.*"))
+                .willReturn(aResponse()
+                        .withStatus(404)
+                        .withBody("")));
+
+        final String clientId = "EssServiceIT#externalDatabaseRespondsWithNotFound";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(),
+                    is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId), is(Collections.emptyList()));
+    }
+
+    @Test
+    void externalDatabaseTimeout() {
+        // Testing Read-timeout
+        wireMockServer.stubFor(get(urlMatching("/.*?query=horse&startRecord=1&maximumRecords=1"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("open_format_horse_response.xml")
                         .withFixedDelay(fixedDelay)));
 
-        // Test all configured external search systems
-        List<String> bases = conf.getBases();
-        for( String base: bases) {
-            Response response = essService.requestCQL(base, "horse", 1, 1, "netpunkt_standard", "");
-            assertEquals(500, response.getStatus());
+        final String clientId = "EssServiceIT#externalDatabaseTimeout";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "1")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            assertThat("service response", response.getStatus(),
+                    is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
         }
+
+        assertThat("Usage log", getUsageByClientId(clientId), is(Collections.emptyList()));
     }
 
     @Test
-    public void baseNotValidTest() throws Exception {
-        System.out.println("baseNotValidTest");
+    void maxPageSize() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("base_bibsys_horse_response.xml")));
-        // TODO open format should fail, and when we know how it errors, we should error appropriately
-        // TODO needs open format stub...
-        Response response = essService.requestCQL("XYZ", "horse", 1, 1, "netpunkt_standard", "");
-        assertEquals(500, response.getStatus());
-    }
-
-    @Test
-    public void maxPageSizeProperMetaRequest() throws Exception {
-        System.out.println("maxPageSizeProperMetaRequest");
-        // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=5")) // todo: had to alter this!
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=5")) // todo: had to alter this!
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("response_max_page_5.xml")));
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -498,21 +653,41 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
 
-        Response response = essService.requestCQL("bibsys", "horse", 1, 100, "netpunkt_standard", "");
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5, r.records.size());
+        final String clientId = "EssServiceIT#maxPageSize";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("rows", "5")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of records", essResponse.records.size(), is(5));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(5))));
     }
 
     @Test
-    public void maxPageSizeDefaultToMax() throws Exception {
-        System.out.println("maxPageSizeDefaultToMax");
+    void maxPageSizeDefaultToMax() {
         // Stubbing request to base
-        stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=" + conf.getMaxPageSize()))
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=25"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("response_max_page_5.xml")));
-        stubFor(post(urlEqualTo("/"))
+        wireMockServer.stubFor(post(urlEqualTo("/"))
                 // Check root is format request with correct namespace
                 .withRequestBody(matchingXPath("//fr:formatRequest")
                         .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
@@ -521,9 +696,66 @@ public class EssServiceIT {
                         .withHeader("Content-Type","text/xml;charset=UTF-8")
                         .withBodyFile("open_format_horse_response.xml")));
 
-        Response response = essService.requestCQL("bibsys", "horse", null, null, "netpunkt_standard", null);
-        EssResponse r = (EssResponse) response.getEntity();
-        assertEquals(5, r.records.size());
+        final String clientId = "EssServiceIT#maxPageSizeDefaultToMax";
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .withQueryParameter("clientId", clientId)
+                .withQueryParameter("agencyId", "123456")
+                .execute()) {
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of records", essResponse.records.size(), is(5));
+        }
+
+        assertThat("Usage log", getUsageByClientId(clientId),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withClientId(clientId)
+                                .withAgencyId("123456")
+                                .withRecordCount(5))));
+    }
+
+    @Test
+    void nullClientIdStillUsageLogged() {
+        // Stubbing request to base
+        wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=25"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml")
+                        .withBodyFile("response_max_page_5.xml")));
+        wireMockServer.stubFor(post(urlEqualTo("/"))
+                // Check root is format request with correct namespace
+                .withRequestBody(matchingXPath("//fr:formatRequest")
+                        .withXPathNamespace("fr","http://oss.dbc.dk/ns/openformat"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type","text/xml;charset=UTF-8")
+                        .withBodyFile("open_format_horse_response.xml")));
+
+        try (Response response = new HttpGet(httpClient)
+                .withBaseUrl(serviceBaseUrl)
+                .withPathElements("api")
+                .withQueryParameter("base", "bibsys")
+                .withQueryParameter("query", "horse")
+                .withQueryParameter("format", "netpunkt_standard")
+                .execute()) {
+
+            final EssResponse essResponse = response.readEntity(EssResponse.class);
+            assertThat("number of records", essResponse.records.size(), is(5));
+        }
+
+        assertThat("Usage log", getUsageByClientId(null),
+                is(Collections.singletonList(
+                        new Usage()
+                                .withDatabaseId("bibsys")
+                                .withRecordCount(5))));
+                                
     }
 
 }

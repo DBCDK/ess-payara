@@ -1,3 +1,8 @@
 {
-  "appName": "dbc-ess-payara"
+  "appName": "dbc-ess-payara",
+  "jdbc": {
+    "jdbc/ess_db": {
+      "url": "${ESS_DB_URL}"
+    }
+  }
 }
