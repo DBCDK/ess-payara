@@ -12,13 +12,9 @@ if (env.BRANCH_NAME == 'master') {
     ])
 }
 pipeline {
-    agent { label "devel10" }
+    agent { label "devel11" }
     tools {
         maven "Maven 3"
-        jdk "jdk11"
-    }
-    environment {
-        MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
     }
     triggers {
         pollSCM("H/3 * * * *")
@@ -28,102 +24,43 @@ pipeline {
         timestamps()
     }
     stages {
+        stage("clear workspace") {
+            steps {
+                deleteDir()
+                checkout scm
+            }
+        }
         stage("build") {
             steps {
-                // Fail Early..
                 script {
-                    if (! env.BRANCH_NAME) {
-                        currentBuild.rawBuild.result = Result.ABORTED
-                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
-                    } else {
-                        println(" Building BRANCH_NAME == ${BRANCH_NAME}")
-                    }
-                }
+                    def status = sh returnStatus: true, script:  """
+                        rm -rf \$WORKSPACE/.repo
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo dependency:resolve dependency:resolve-plugins >/dev/null || true
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
+                    """
 
-                sh """
-                    rm -rf \$WORKSPACE/.repo/dk/dbc
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
-                """
-                script {
-                    junit testResults: '**/target/surefire-reports/TEST-*.xml'
+                    // We want code-coverage and pmd/spotbugs even if unittests fails
+                    status += sh returnStatus: true, script:  """
+                        ./scripts/build
+                    """
+
+                    junit testResults: '**/target/*-reports/*.xml'
 
                     def java = scanForIssues tool: [$class: 'Java']
                     def javadoc = scanForIssues tool: [$class: 'JavaDoc']
+                    publishIssues issues:[java, javadoc], unstableTotalAll:1
 
-                    publishIssues issues:[java,javadoc], unstableTotalAll:1
-                }
-            }
-        }
+                    def pmd = scanForIssues tool: [$class: 'Pmd']
+                    publishIssues issues:[pmd]
 
-        stage("analysis") {
-            steps {
-                sh """
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo pmd:pmd pmd:cpd findbugs:findbugs
-                """
+                    def spotbugs = scanForIssues tool: [$class: 'SpotBugs']
+                    publishIssues issues:[spotbugs]
 
-                script {
-                    def pmd = scanForIssues tool: [$class: 'Pmd'], pattern: '**/target/pmd.xml'
-                    publishIssues issues:[pmd], unstableTotalAll:1
-
-                    def cpd = scanForIssues tool: [$class: 'Cpd'], pattern: '**/target/cpd.xml'
-                    publishIssues issues:[cpd]
-
-                    def findbugs = scanForIssues tool: [$class: 'FindBugs'], pattern: '**/target/findbugsXml.xml'
-                    publishIssues issues:[findbugs], unstableTotalAll:1
-                }
-            }
-        }
-
-        stage("coverage") {
-            steps {
-                step([$class: 'JacocoPublisher', 
-                      execPattern: '**/target/*.exec',
-                      classPattern: '**/target/classes',
-                      sourcePattern: '**/src/main/java',
-                      exclusionPattern: '**/src/test*'
-                ])
-            }
-        }
-
-        stage('Docker') {
-            steps {
-                script {
-                    if (! env.CHANGE_BRANCH) {
-                        imageLabel = env.BRANCH_NAME
+                    if (status != 0) {
+                        error("build failed")
                     } else {
-                        imageLabel = env.CHANGE_BRANCH
-                    }
-                    if ( ! (imageLabel ==~ /master|trunk/) ) {
-                        println("Using branch_name ${imageLabel}")
-                        imageLabel = imageLabel.split(/\//)[-1]
-                        imageLabel = imageLabel.toLowerCase()
-                    } else {
-                        println(" Using Master branch ${BRANCH_NAME}")
-                        imageLabel = env.BUILD_NUMBER
-                    }
-
-                    def dockerFiles = findFiles(glob: '**/target/docker/Dockerfile')
-                    def version = readMavenPom().version.replace('-SNAPSHOT', '')
-
-                    for (def dockerFile : dockerFiles) {
-                        def dirName = dockerFile.path.replace('/target/docker/Dockerfile', '')
-                        dir(dirName) {
-                            def modulePom = readMavenPom file: 'pom.xml'
-                            def projectArtifactId = modulePom.getArtifactId()
-                            def imageName = "${projectArtifactId}-${version}".toLowerCase()
-                            println("In ${dirName} build ${projectArtifactId} as ${imageName}:$imageLabel")
-                            def app = docker.build("$imageName:${imageLabel}", "--pull --file target/docker/Dockerfile .")
-
-                            if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
-                                docker.withRegistry('https://docker-os.dbc.dk', 'docker') {
-                                    app.push()
-                                    if (env.BRANCH_NAME ==~ /master|trunk/) {
-                                        app.push "latest"
-                                    }
-                                }
-                            }
-                        }
+                        def dockerImageName = readFile(file: 'service/docker.out')
+                        docker.image(dockerImageName).push()
                     }
                 }
             }
@@ -132,7 +69,7 @@ pipeline {
     post {
         failure {
             script {
-                if ("${env.BRANCH_NAME}" == 'master') {
+                if ("${env.BRANCH_NAME}".equals('master')) {
                     emailext(
                             recipientProviders: [developers(), culprits()],
                             to: "de-team@dbc.dk",
