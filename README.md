@@ -8,8 +8,7 @@ Servicen er et Payara projekt med config defineret i `service/src/main/resources
 Følgende environment-variabler er obligatoriske:
  - `BASES`: Hvilke baser som servicen tillader at efterspørge meta proxyen med til universal search.
  - `META_PROXY_URL`: Endpoint for meta proxy til universal search.
- - `OPEN_FORMAT_URL`: Url til en open format service.
- - `ESS_DB_URL`: ESS database URL til forbrugslogning
+ - `OPEN_FORMAT_URL`: Url til en open format service. 
  
 ## Query parametre
  - `base`: Parameter der beskriver hvilken base der søges ned i. Exsempler inkluderer: `libris` og `bibsys`.

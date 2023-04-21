@@ -1,11 +1,10 @@
-FROM docker-dbc.artifacts.dbccloud.dk/payara5-micro:latest
+FROM docker.dbc.dk/payara5-micro:latest
 
 LABEL \
-    ESS_DB_URL="ESS database URL (required)" \
     META_PROXY_URL="Url of metaproxy (indexdata.com) (required)" \
     OPEN_FORMAT_URL="Url of openformat service (required)" \
-    FORMATS="Comma seperated list of known formats (optional, default 'netpunkt_standard')" \
-    MAX_PAGE_SIZE="Maximum number of documents retrieveable with a query (optional, default 25)" \
+    FORMATS="Comma seperated list of known formats (required)" \
+    MAX_PAGE_SIZE="Maximum number of documents retrieveable with a query (required)" \
     BASES="Comma seperated list of known bases (required)"
 
 ENV JAVA_MAX_HEAP_SIZE=2G

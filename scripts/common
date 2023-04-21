@@ -3,33 +3,38 @@
 set -e
 
 getMyIP() {
-  local _ip _line
-  while IFS=$': \t' read -a _line ;do
-    [ -z "${_line%inet}" ] &&
-      _ip=${_line[${#_line[1]}>4?1:2]} &&
-      [ "${_ip#127.0.0.1}" ] &&
-      echo $_ip &&
-      return 0
+    local _ip _line
+    while IFS=$': \t' read -a _line ;do
+        [ -z "${_line%inet}" ] &&
+           _ip=${_line[${#_line[1]}>4?1:2]} &&
+           [ "${_ip#127.0.0.1}" ] && echo $_ip && return 0
       done< <(LANG=C /sbin/ifconfig)
 }
 
 # build and test run values
 PORT=${PORT:-8080}
+POSTGRES_LINUX_USER=${USER}
 DOCKER_REGISTRY=docker-de.artifacts.dbccloud.dk
-DOCKER_NAME=ess-payara-service
+DOCKER_NAME=series-service
 DOCKER_REPOSITORY=${DOCKER_REGISTRY}/${DOCKER_NAME}
+VIPCORE_ENDPOINT=${VIPCORE_ENDPOINT:-http://vipcore.iscrum-vip-prod.svc.cloud.dbc.dk/1.0/api}
 
-# app values
-ESS_DB_URL=${ESS_DB_URL:-"${USER}:${USER}@$(getMyIP):5432/ess_db"}
-BASES=${BASES:-"bibsys,OLUCWorldCat,ArticleFirst"}
-MAX_PAGE_SIZE=${MAX_PAGE_SIZE:-"25"}
-FORMATS=${FORMATS:-"netpunkt_standard"}
+# set the docker image tag without branch name if on master
+DOCKER_IMAGE_TAG=${BRANCH_NAME}-${BUILD_NUMBER}
+if [ "$BRANCH_NAME" == "master" ]; then
+  DOCKER_IMAGE_TAG=${BUILD_NUMBER}
+fi
+
+SERIES_SERVICE_POSTGRES_URL=${SERIES_SERVICE_POSTGRES_URL:-"${USER}:${USER}@$(getMyIP):5432/series-service-db"}
+MAX_POOL_SIZE=24
 
 # base image mandatory values
+BOOTSTRAP_SERVERS=${BOOTSTRAP_SERVERS:-kafka-p201.dbc.dk:9092}
+PROFILE_TOPIC=${PROFILE_TOPIC:-pu-vip-prod-profiles}
 JAVA_MAX_HEAP_SIZE=${JAVA_MAX_HEAP_SIZE:-2G}
 LOG_FORMAT=${LOG_FORMAT:-text}
 
-# Lets color a bit. This is clearly a waste of time... (setup in load function).
+# lets color a bit. This is clearly a waste of time... (setup in load function).
 _NOCOLOR=
 _ERROR_COLOR=
 _INFO_COLOR=
@@ -50,7 +55,8 @@ function die() {
   exit 1
 }
 
-# If tty output, lets put some colors on.
+
+# If tty output, let's put some colors on.
 if [ -t 1 ] ; then
   _INFO_COLOR=$(tput setaf 2)  # Green
   _ERROR_COLOR=$(tput setaf 1)

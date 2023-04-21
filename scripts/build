@@ -3,25 +3,15 @@
 source "$(realpath $(dirname "${0}")/..)/scripts/common"
 
 case "$1" in
-  docker)
-    DOCKER_TAG=devel
-    if [[ -n "$BUILD_NUMBER" ]]; then
-      if [ "$BRANCH_NAME" = "master" ]; then
-        DOCKER_TAG=$BUILD_NUMBER
-      else
-        DOCKER_TAG=$BRANCH_NAME-$BUILD_NUMBER
-      fi
-    fi
-    docker_image="$DOCKER_REPOSITORY-$2":"$DOCKER_TAG"
-    docker build -f target/docker/Dockerfile . -t "$docker_image" || die "docker build failed"
-    echo -n "$docker_image" > docker.out
-    ;;
+    docker)
+        if [[ ! -z "$BUILD_NUMBER" ]]; then
+            docker build -f target/docker/Dockerfile --pull --no-cache . -t ${DOCKER_REPOSITORY}:${DOCKER_IMAGE_TAG} || exit 1
+        else
+            docker build -f target/docker/Dockerfile . -t ${DOCKER_REPOSITORY}:devel || exit 1
+        fi
+        ;;
 
-  *)
-    CI_OPTS=""
-    if [ -n "$BUILD_NUMBER" ]; then
-      CI_OPTS="-B -Dmaven.repo.local=$WORKSPACE/.repo"
-    fi
-    mvn $CI_OPTS verify pmd:pmd pmd:cpd spotbugs:spotbugs javadoc:aggregate
-    ;;
+    *)
+        mvn clean verify
+        ;;
 esac

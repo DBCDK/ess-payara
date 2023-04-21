@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-source "$(realpath $(dirname "${0}")/..)/scripts/common"
-
-docker run -ti --rm --name "${DOCKER_NAME}-${PORT}" -e "ESS_DB_URL=${ESS_DB_URL}" -e "META_PROXY_URL=${META_PROXY_URL}" -e "OPEN_FORMAT_URL=${OPEN_FORMAT_URL}" -e "BASES=${BASES}" -e "FORMATS=${FORMATS}" -e "MAX_PAGE_SIZE=${MAX_PAGE_SIZE}" -e "JAVA_MAX_HEAP_SIZE=${JAVA_MAX_HEAP_SIZE}" -e "LOG_FORMAT=${LOG_FORMAT}" -p "${PORT}:8080" "$(cat service/docker.out)"
