@@ -22,6 +22,7 @@ pipeline {
     }
 
     options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: "", artifactNumToKeepStr: "", daysToKeepStr: "30", numToKeepStr: "30"))
         timestamps()
     }
 
@@ -108,6 +109,7 @@ pipeline {
         }
 
         success {
+            step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
             script {
                 if ("${env.BRANCH_NAME}" == 'master' && currentBuild.getPreviousBuild() != null && currentBuild.getPreviousBuild().result == 'FAILURE') {
                     emailext(
