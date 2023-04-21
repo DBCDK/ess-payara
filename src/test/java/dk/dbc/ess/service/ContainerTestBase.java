@@ -45,7 +45,7 @@ public abstract class ContainerTestBase {
         wireMockServer = startWiremockServer();
         essDbContainer = startEssDbContainer();
         serviceContainer = startServiceContainer();
-        serviceBaseUrl = String.format("http://%s:%d", serviceContainer.getContainerIpAddress(),
+        serviceBaseUrl = String.format("http://%s:%d", serviceContainer.getHost(),
                 serviceContainer.getMappedPort(8080));
         httpClient = HttpClient.create(HttpClient.newClient());
     }
