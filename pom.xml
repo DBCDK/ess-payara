@@ -134,6 +134,14 @@
                     <excludePackageNames>dk.dbc.openformat,dk.dbc.sru.*</excludePackageNames>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <onlyAnalyze>dk.dbc.ess.*</onlyAnalyze>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
