@@ -68,9 +68,9 @@ pipeline {
                     if (status != 0) {
                         error("Build failure")
                     } else {
-                        docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service:${DOCKER_PUSH_TAG}").push()
+                        docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:${DOCKER_PUSH_TAG}").push()
                         if ("${env.BRANCH_NAME}" == 'master') {
-                            docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service:${DOCKER_PUSH_TAG}").push('latest')
+                            docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:${DOCKER_PUSH_TAG}").push('latest')
                         }
                     }
                 }
