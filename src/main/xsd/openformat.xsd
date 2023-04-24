@@ -38,7 +38,7 @@
         <xs:complexType>
             <xs:choice>
                 <xs:any processContents="skip" />
-                <!--<xs:element ref="of:error"/>-->
+                <!--<xs:element ref="of:error"/>  - cos-nonambig: WC[##any] and "http://oss.dbc.dk/ns/openformat":error (or elements from their substitution group) violate "Unique Particle Attribution". -->
             </xs:choice>
         </xs:complexType>
     </xs:element>

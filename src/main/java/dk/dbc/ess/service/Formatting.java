@@ -133,11 +133,6 @@ public class Formatting {
                         log.trace("Cannot convert using JAXB", e);
                     }
                 }
-//                String error = formatted.getError();
-//                if (error != null) {
-//                    log.error("Openformat responded with: " + error + " for: " + trackingId);
-//                    return error("Formatting error - content error");
-//                }
                 Element any = formatted.getAny();
                 if("error".equals(any.getLocalName())) {
                     String error  = any.getTextContent();
