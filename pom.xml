@@ -12,7 +12,7 @@
     <parent>
         <groupId>dk.dbc</groupId>
         <artifactId>microservice-pom</artifactId>
-        <version>latest-SNAPSHOT</version>
+        <version>java11-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -60,25 +60,75 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
                         <id>xjc</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>xjc</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <strict>false</strict>
-                    <verbose>true</verbose>
-                    <schemaDirectory>${basedir}/src/main/xsd</schemaDirectory>
-                    <extension>true</extension>
-                    <packageLevelAnnotations>false</packageLevelAnnotations>
+                    <arguments>
+                        <argument>-Xequals</argument>
+                        <argument>-XtoString</argument>
+                        <argument>-XhashCode</argument>
+                    </arguments>
+                    <xjbSources>
+                        <xjbSource>src/main/xsd/bindings.xjb</xjbSource>
+                    </xjbSources>
+                    <sources>
+                        <source>src/main/xsd/diagnostic.xsd</source>
+                        <source>src/main/xsd/facetedResults.xsd</source>
+                        <source>src/main/xsd/openformat.xsd</source>
+                        <source>src/main/xsd/scan.xsd</source>
+                        <source>src/main/xsd/searchResultAnalysis.xsd</source>
+                        <source>src/main/xsd/sruRequest.xsd</source>
+                        <source>src/main/xsd/sruResponse.xsd</source>
+                        <source>src/main/xsd/xcql.xsd</source>
+                    </sources>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.glassfish.jaxb</groupId>
+                        <artifactId>jaxb-xjc</artifactId>
+                        <version>4.0.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
+                        <version>2.1.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>jakarta.xml.bind</groupId>
+                        <artifactId>jakarta.xml.bind-api</artifactId>
+                        <version>4.0.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                        <version>4.0.2</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.patrodyne.jvnet</groupId>
+                        <artifactId>hisrc-basicjaxb-plugins</artifactId>
+                        <version>2.1.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                        <version>1.2</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
@@ -158,24 +208,34 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources/annotations</excludeRoot>
+                        <excludeRoot>target/generated-sources/jaxb</excludeRoot>
+                    </excludeRoots>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.ws</groupId>
             <artifactId>jakarta.xml.ws-api</artifactId>
-            <version>2.3.3</version>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
-            <version>2.3.3</version>
+            <version>4.0.0</version>
         </dependency>
 
         <dependency>
@@ -191,9 +251,8 @@
             <artifactId>microprofile-openapi-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
 
         <dependency>
@@ -202,9 +261,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-healthchecks</artifactId>
-            <version>3.0.2</version>
+            <groupId>org.patrodyne.jvnet</groupId>
+            <artifactId>hisrc-basicjaxb-runtime</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
         <dependency>
@@ -231,7 +290,7 @@
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-testcontainers-postgres</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -241,11 +300,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-httpclient</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -261,7 +322,6 @@
             <artifactId>wiremock</artifactId>
             <version>2.27.2</version>
             <scope>test</scope>
-            <type>jar</type>
         </dependency>
 
         <dependency>
@@ -273,6 +333,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-jaxb</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -282,11 +343,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
-
 
 </project>

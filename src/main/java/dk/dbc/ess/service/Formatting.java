@@ -30,17 +30,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.ejb.Singleton;
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import jakarta.ejb.Singleton;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -133,12 +133,13 @@ public class Formatting {
                         log.trace("Cannot convert using JAXB", e);
                     }
                 }
-                String error = formatted.getError();
-                if (error != null) {
+                Element any = formatted.getAny();
+                if("error".equals(any.getLocalName())) {
+                    String error  = any.getTextContent();
                     log.error("Openformat responded with: " + error + " for: " + trackingId);
                     return error("Formatting error - content error");
                 }
-                return formatted.getAny();
+                return any;
             } else {
                 log.error("OpenFormat responded http status: " + status + " for: " + trackingId);
                 return error("Formatting error - server error");

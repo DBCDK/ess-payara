@@ -20,8 +20,8 @@ package dk.dbc.ess.service.response;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  *
