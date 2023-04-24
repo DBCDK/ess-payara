@@ -18,7 +18,7 @@ pipeline {
     triggers {
         pollSCM("H/3 * * * *")
         // This project uses the docker.dbc.dk/payara5-micro container
-        upstream('/Docker-payara5-bump-trigger')
+        upstream('/Docker-payara6-bump-trigger')
     }
 
     options {
