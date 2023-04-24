@@ -208,6 +208,17 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources/annotations</excludeRoot>
+                        <excludeRoot>target/generated-sources/jaxb</excludeRoot>
+                    </excludeRoots>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
