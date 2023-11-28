@@ -116,17 +116,17 @@ public class Formatting {
 
                 final String error = formattedObject.getError();
                 if (error != null) {
-                    log.error("Openformat responded with: {} for: {}", error, trackingId);
+                    log.error("Openformat responded with: {} for: {} - {}", error, id, trackingId);
                     return error("Formatting error - content error: " + error);
                 }
 
                 return getFormattedElement(formattedObject.getFormatted());
             } else {
-                log.error("OpenFormat responded http status: {} for: {}", status, trackingId);
+                log.error("OpenFormat responded http status: {} for: {} - {}", status, id, trackingId);
                 return error("Formatting error - server error: status=" + status);
             }
         } catch (Exception ex) {
-            log.error("Error processing record: {} for: {}", ex.getClass(), trackingId, ex);
+            log.error("Error processing record: {} for: {} - {}", ex.getClass(), id, trackingId, ex);
         }
         return ERROR_DOCUMENT.getDocument("Internal Server Error");
     }
