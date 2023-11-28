@@ -18,18 +18,9 @@
  */
 package dk.dbc.ess.service;
 
-import dk.dbc.openformat.FormatRequest;
-import dk.dbc.openformat.FormatResponse;
+import dk.dbc.open.format.dto.FormatRequest;
+import dk.dbc.open.format.dto.FormatResponse;
 import dk.dbc.openformat.OriginalData;
-import org.eclipse.microprofile.metrics.annotation.Timed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
@@ -38,20 +29,31 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXB;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-/**
- *
- * @author Noah Torp-Smith (nots@dbc.dk)
- */
 @Singleton
 public class Formatting {
     private static final Logger log = LoggerFactory.getLogger(Formatting.class);
@@ -87,68 +89,79 @@ public class Formatting {
 
     public static final ErrorDocument ERROR_DOCUMENT = new ErrorDocument();
 
-    @Timed(name = "formatting-call-openFormat")
-    private static Response InvokeUrl(Client client, String openFormatUrl, FormatRequest request) {
+    @Timed(name = "call-openformat")
+    static Response InvokeUrl(Client client, String openFormatUrl, FormatRequest request) {
         Invocation invocation = client.target(openFormatUrl)
-                .request(MediaType.APPLICATION_XML_TYPE)
-                .buildPost(Entity.entity(request, MediaType.APPLICATION_XML_TYPE));
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .buildPost(Entity.entity(request, MediaType.APPLICATION_JSON_TYPE));
         return invocation.invoke();
     }
 
     private Element format(Element in, String outputFormat, String id, String trackingId) {
         try {
-            FormatRequest request = new FormatRequest();
-            request.setOutputFormat(outputFormat);
-            request.setTrackingId(trackingId);
-            OriginalData originalData = new OriginalData();
+            final OriginalData originalData = new OriginalData();
             originalData.setIdentifier(id);
             originalData.setAny(in);
-            request.getOriginalDatas().add(originalData);
-            if (log.isTraceEnabled()) {
-                StringWriter sw = new StringWriter();
-                try {
-                    JAXBContext carContext = JAXBContext.newInstance(FormatRequest.class);
-                    Marshaller carMarshaller = carContext.createMarshaller();
-                    carMarshaller.marshal(request, sw);
-                    log.trace("request = {}", sw);
-                } catch (JAXBException e) {
-                    log.trace("Cannot convert using JAXB", e);
-                }
-            }
 
-            Response response = InvokeUrl(client, openFormatUrl, request);
+            final FormatRequest formatRequest = getFormatRequest(outputFormat, originalData, trackingId);
+
+            Response response = InvokeUrl(client, openFormatUrl, formatRequest);
             Response.StatusType status = response.getStatusInfo();
             log.debug("status = {}", status);
 
             if (status.equals(Response.Status.OK)) {
-                FormatResponse formatted = response.readEntity(FormatResponse.class);
-                if (log.isTraceEnabled()) {
-                    StringWriter sw = new StringWriter();
-                    try {
-                        JAXBContext carContext = JAXBContext.newInstance(FormatResponse.class);
-                        Marshaller carMarshaller = carContext.createMarshaller();
-                        carMarshaller.marshal(formatted, sw);
-                        log.trace("response = {}", sw);
-                    } catch (JAXBException e) {
-                        log.trace("Cannot convert using JAXB", e);
-                    }
+                final FormatResponse formatResponse = response.readEntity(FormatResponse.class);
+                final FormatResponse.Formatted formattedObject = formatResponse.getObjects().get(0).get(outputFormat);
+
+                final String error = formattedObject.getError();
+                if (error != null) {
+                    log.error("Openformat responded with: {} for: {}", error, trackingId);
+                    return error("Formatting error - content error: " + error);
                 }
-                Element any = formatted.getAny();
-                if("error".equals(any.getLocalName())) {
-                    String error  = any.getTextContent();
-                    log.error("Openformat responded with: " + error + " for: " + trackingId);
-                    return error("Formatting error - content error");
-                }
-                return any;
+
+                return getFormattedElement(formattedObject.getFormatted());
             } else {
-                log.error("OpenFormat responded http status: " + status + " for: " + trackingId);
-                return error("Formatting error - server error");
+                log.error("OpenFormat responded http status: {} for: {}", status, trackingId);
+                return error("Formatting error - server error: status=" + status);
             }
         } catch (Exception ex) {
-            log.error("Error processing record: " + ex.getClass().getName() + " " + ex.getMessage() + " for: " + trackingId);
-            log.debug("Error processing record:", ex);
+            log.error("Error processing record: {} for: {}", ex.getClass(), trackingId, ex);
         }
         return ERROR_DOCUMENT.getDocument("Internal Server Error");
+    }
+
+    private FormatRequest getFormatRequest(String displayFormat, OriginalData input, String trackingId) {
+        final StringWriter sw = new StringWriter();
+        JAXB.marshal(input, sw);
+        String inputXmlString = sw.toString();
+        log.trace("input = {}", inputXmlString);
+
+        final FormatRequest.ObjectSource objectSource = new FormatRequest.ObjectSource();
+        objectSource.setObject(inputXmlString);
+
+        final FormatRequest formatRequest = new FormatRequest();
+        formatRequest.setFormats(Set.of(displayFormat));
+        formatRequest.setTrackingId(trackingId);
+        formatRequest.setObjects(List.of(objectSource));
+
+        return formatRequest;
+    }
+
+    private Element getFormattedElement(String formatted) throws ParserConfigurationException, IOException, SAXException {
+        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        final Document parsedDocument = documentBuilder.parse(new InputSource(new StringReader(formatted)));
+        final Element parsedElement = parsedDocument.getDocumentElement();
+        final String format = parsedElement.getAttribute("format");
+
+        final Document formattedDocument = documentBuilder.newDocument();
+        final Element formattedElement = formattedDocument.createElementNS("http://oss.dbc.dk/ns/openformat", format);
+        final NodeList parsedElementChildNodes = parsedElement.getChildNodes();
+        for (int i = 0; i < parsedElementChildNodes.getLength(); i++) {
+            final Node child = formattedDocument.importNode(parsedElementChildNodes.item(i), true);
+            formattedElement.appendChild(child);
+        }
+        return formattedElement;
     }
 
     private Element error(String message) {

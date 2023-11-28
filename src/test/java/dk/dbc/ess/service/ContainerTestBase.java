@@ -116,7 +116,7 @@ public abstract class ContainerTestBase {
                     .withEnv("LOG_FORMAT", "text")
                     .withEnv("ESS_DB_URL", essDbContainer.getPayaraDockerJdbcUrl())
                     .withEnv("META_PROXY_URL", wireMockServerUrl)
-                    .withEnv("OPEN_FORMAT_URL", wireMockServerUrl)
+                    .withEnv("OPEN_FORMAT_URL", wireMockServerUrl + "/api/v1/format")
                     .withEnv("BASES", "libris,bibsys")
                     .withExposedPorts(8080)
                     .waitingFor(Wait.forHttp("/openapi"))

@@ -22,18 +22,14 @@ Eksempel URL:
 `http://host:port/api/?base=bibsys&query=horse&start=&rows=1&format=netpunkt_standard&trackingId=`
  
 ## Build docker image
-Først bygges `.war` fil med  `mvn clean package` og derefter `docker build -t ess-payara -f target/docker/Dockerfile .` (inklusiv det sidste punktum).
+Bygges med  `mvn clean package`.
  
  ## Run docker image
  
 Her er et eksempel der viser hvordan docker imaget kan køres.
- Here is an example of a command to run the image - the values of the environment vars come from gitlab:
  
- `docker run -e "META_PROXY_URL=http://pz2-p01.dbc.dk:9001/" -e "OPEN_FORMAT_URL=http://openformat-php-master.frontend-prod.svc.cloud.dbc.dk/server.php" -e "BASES=bibsys,OLUCWorldCat,ArticleFirst" -ti --net=host -e JAVA_OPTS="-Dhazelcast.rest.enabled=true" ess-payara`
+ `docker run -e ESS_DB_URL=[DB_USER]:[DB_PASS]@db.ess-v13.stg.dbc.dk:5432/ess_db -e "META_PROXY_URL=http://pz2-p01.dbc.dk:9001/" -e "OPEN_FORMAT_URL=http://open-format-broker.cisterne.svc.cloud.dbc.dk/api/v1/format" -e "BASES=bibsys,OLUCWorldCat,ArticleFirst" -ti --net=host -e JAVA_OPTS="-Dhazelcast.rest.enabled=true" docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:devel`
  
 Endnu et eksempel, hvis du har brug for mere output til debug (i dette tilfælde fra klassen `Formatting`):
 
-`docker run -e "META_PROXY_URL=http://pz2-p01.dbc.dk:9001/" -e "OPEN_FORMAT_URL=http://openformat-php-master.frontend-prod.svc.cloud.dbc.dk/server.php" -e "BASES=bibsys,OLUCWorldCat,ArticleFirst" -e LOG__dk_dbc=DEBUG -ti --net=host -e JAVA_OPTS="-Dhazelcast.rest.enabled=true" -e LOG__dk_dbc_ess_service_Formatting=TRACE -v $PWD/target/ess-payara-service.war:/opt/payara5/deployments/ess-payara-service.war -p 8080:8080 ess-payara`
-
-## Noter
- - Få OpenFormat endpoint der ikke fejler, deploy External Search Service med denne.
+`docker run -e ESS_DB_URL=[DB_USER]:[DB_PASS]@db.ess-v13.stg.dbc.dk:5432/ess_db -e "META_PROXY_URL=http://pz2-p01.dbc.dk:9001/" -e "OPEN_FORMAT_URL=http://open-format-broker.cisterne.svc.cloud.dbc.dk/api/v1/format" -e "BASES=bibsys,OLUCWorldCat,ArticleFirst" -e LOG__dk_dbc=DEBUG -ti --net=host -e JAVA_OPTS="-Dhazelcast.rest.enabled=true" -e LOG__dk_dbc_ess_service_Formatting=TRACE -v $PWD/target/ess-payara-service.war:/opt/payara5/deployments/ess-payara-service.war -p 8080:8080 docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:devel`
