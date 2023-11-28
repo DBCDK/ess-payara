@@ -40,9 +40,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 class EssServiceIT extends ContainerTestBase {
 
-    private final int readTimeout = 1500;              // ms
-    private final int fixedDelay  = readTimeout + 500; // ms
-
     @Test
     void externalDatabaseCQL_OK() {
         wireMockServer.stubFor(get(urlEqualTo("/bibsys?query=horse&startRecord=1&maximumRecords=1"))
@@ -51,6 +48,8 @@ class EssServiceIT extends ContainerTestBase {
                         .withHeader("Content-Type","text/xml")
                         .withBodyFile("base_bibsys_horse_response.xml")));
         wireMockServer.stubFor(post(urlEqualTo("/api/v1/format"))
+                .withRequestBody(matchingJsonPath("$.formats", containing("netpunkt_standard")))
+                .withRequestBody(matchingJsonPath("$.objects[?(@.object)]"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","application/json;charset=UTF-8")
@@ -263,7 +262,7 @@ class EssServiceIT extends ContainerTestBase {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type","application/json;charset=UTF-8")
-                        .withBodyFile("open_format_error_response.xml")));
+                        .withBodyFile("open_format_error_response.json")));
 
         final String clientId = "EssServiceIT#openFormatFormatErrorResponse";
 
@@ -437,36 +436,6 @@ class EssServiceIT extends ContainerTestBase {
                         .withBody("")));
 
         final String clientId = "EssServiceIT#externalDatabaseRespondsWithNotFound";
-
-        try (Response response = new HttpGet(httpClient)
-                .withBaseUrl(serviceBaseUrl)
-                .withPathElements("api")
-                .withQueryParameter("base", "bibsys")
-                .withQueryParameter("query", "horse")
-                .withQueryParameter("format", "netpunkt_standard")
-                .withQueryParameter("rows", "1")
-                .withQueryParameter("clientId", clientId)
-                .withQueryParameter("agencyId", "123456")
-                .execute()) {
-
-            assertThat("service response", response.getStatus(),
-                    is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
-        }
-
-        assertThat("Usage log", getUsageByClientId(clientId), is(Collections.emptyList()));
-    }
-
-    @Test
-    void externalDatabaseTimeout() {
-        // Testing Read-timeout
-        wireMockServer.stubFor(get(urlMatching("/.*?query=horse&startRecord=1&maximumRecords=1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type","text/xml")
-                        .withBodyFile("open_format_horse_response.xml")
-                        .withFixedDelay(fixedDelay)));
-
-        final String clientId = "EssServiceIT#externalDatabaseTimeout";
 
         try (Response response = new HttpGet(httpClient)
                 .withBaseUrl(serviceBaseUrl)

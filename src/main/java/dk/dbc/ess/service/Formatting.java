@@ -20,7 +20,6 @@ package dk.dbc.ess.service;
 
 import dk.dbc.open.format.dto.FormatRequest;
 import dk.dbc.open.format.dto.FormatResponse;
-import dk.dbc.openformat.OriginalData;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
@@ -29,7 +28,6 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.xml.bind.JAXB;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +42,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -99,11 +104,7 @@ public class Formatting {
 
     private Element format(Element in, String outputFormat, String id, String trackingId) {
         try {
-            final OriginalData originalData = new OriginalData();
-            originalData.setIdentifier(id);
-            originalData.setAny(in);
-
-            final FormatRequest formatRequest = getFormatRequest(outputFormat, originalData, trackingId);
+            final FormatRequest formatRequest = getFormatRequest(outputFormat, in, trackingId);
 
             Response response = InvokeUrl(client, openFormatUrl, formatRequest);
             Response.StatusType status = response.getStatusInfo();
@@ -130,10 +131,8 @@ public class Formatting {
         return ERROR_DOCUMENT.getDocument("Internal Server Error");
     }
 
-    private FormatRequest getFormatRequest(String displayFormat, OriginalData input, String trackingId) {
-        final StringWriter sw = new StringWriter();
-        JAXB.marshal(input, sw);
-        String inputXmlString = sw.toString();
+    private FormatRequest getFormatRequest(String displayFormat, Element input, String trackingId) {
+        final String inputXmlString = transformElementToString(input);
         log.trace("input = {}", inputXmlString);
 
         final FormatRequest.ObjectSource objectSource = new FormatRequest.ObjectSource();
@@ -162,6 +161,21 @@ public class Formatting {
             formattedElement.appendChild(child);
         }
         return formattedElement;
+    }
+
+    private String transformElementToString(Element element) {
+        try {
+            final TransformerFactory transFactory = TransformerFactory.newInstance();
+            final Transformer transformer = transFactory.newTransformer();
+            final StringWriter buffer = new StringWriter();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.transform(new DOMSource(element), new StreamResult(buffer));
+            return buffer.toString();
+        } catch (TransformerConfigurationException e) {
+            throw new IllegalStateException(e);
+        } catch (TransformerException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private Element error(String message) {
