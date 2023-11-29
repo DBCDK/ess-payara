@@ -53,10 +53,4 @@
             <jaxb:package name="dk.dbc.sru.xcql"/>
         </jaxb:schemaBindings>
     </jaxb:bindings>
-
-    <jaxb:bindings schemaLocation="openformat.xsd" node="/xs:schema">
-        <jaxb:schemaBindings>
-            <jaxb:package name="dk.dbc.openformat"/>
-        </jaxb:schemaBindings>
-    </jaxb:bindings>
 </jaxb:bindings>

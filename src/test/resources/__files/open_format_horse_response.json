@@ -1,0 +1,9 @@
+{
+    "objects": [
+        {
+            "netpunkt_standard": {
+                "formatted": "<display format=\"netpunkt_standard\"><parent><child>horse</child></parent></display>"
+            }
+        }
+    ]
+}
