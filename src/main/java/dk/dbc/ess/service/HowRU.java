@@ -29,7 +29,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 
 /**
  *
@@ -50,7 +53,8 @@ public class HowRU {
         // check the two services that ESS communicates with.
         String metaProxyUrl = essConfiguration.getMetaProxyUrl();
         String openFormatUrl = essConfiguration.getOpenFormatUrl();
-        if (metaProxyUrlOk(metaProxyUrl) && openFormatUrlOk(openFormatUrl)) {
+        String openFormatHowruUrl = getOpenFormatHowruUrl(openFormatUrl).toString();
+        if (metaProxyUrlOk(metaProxyUrl) && openFormatUrlOk(openFormatHowruUrl)) {
             return Response.ok(new HowRuResponse(null)).build();
         }
         return Response.serverError().build();
@@ -78,15 +82,14 @@ public class HowRU {
     }
 
     /**
-     * Calls the specified openFormat URL with query param HowRU=HowRU and
-     * checks that we get the expected 200 OK status.
+     * Calls the specified openFormat URL and checks that we get the expected 200 OK status.
      * @param url
      * @return whether the openFormat service responds as expected.
      */
     private boolean openFormatUrlOk(String url) {
         try {
             URI uri = new URI(url);
-            Response r = essConfiguration.getClient().target(uri).queryParam("HowRU", "HowRU").request(MediaType.TEXT_PLAIN).get();
+            Response r = essConfiguration.getClient().target(uri).request().get();
             if (r.getStatus() == 200) {
                 return true;
             }
@@ -98,4 +101,13 @@ public class HowRU {
         return false;
     }
 
+    private URL getOpenFormatHowruUrl(String openFormatUrl) {
+        final URL url;
+        try {
+            url = new URL(openFormatUrl);
+            return new URL(url.getProtocol(), url.getHost(), url.getPort() > 0 ? url.getPort() : 80, "/health");
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 }
