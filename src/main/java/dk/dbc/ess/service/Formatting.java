@@ -28,6 +28,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public class Formatting {
 
     private Element format(Element in, String outputFormat, String id, String trackingId) {
         try {
-            final FormatRequest formatRequest = getFormatRequest(outputFormat, in, trackingId);
+            final FormatRequest formatRequest = getFormatRequest(outputFormat, in, id, trackingId);
 
             Response response = InvokeUrl(client, openFormatUrl, formatRequest);
             Response.StatusType status = response.getStatusInfo();
@@ -131,8 +132,12 @@ public class Formatting {
         return ERROR_DOCUMENT.getDocument("Internal Server Error");
     }
 
-    private FormatRequest getFormatRequest(String displayFormat, Element input, String trackingId) {
-        final String inputXmlString = transformElementToString(input);
+    private FormatRequest getFormatRequest(String displayFormat, Element input, String id, String trackingId) {
+        final String inputXmlString =
+                "<input>" +
+                   "<identifier>" + StringEscapeUtils.escapeXml11(id) + "</identifier>" +
+                   transformElementToString(input) +
+                "</input>";
         log.trace("input = {}", inputXmlString);
 
         final FormatRequest.ObjectSource objectSource = new FormatRequest.ObjectSource();
