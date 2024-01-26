@@ -50,7 +50,8 @@ public class HowRU {
         // check the two services that ESS communicates with.
         String metaProxyUrl = essConfiguration.getMetaProxyUrl();
         String openFormatUrl = essConfiguration.getOpenFormatUrl();
-        if (metaProxyUrlOk(metaProxyUrl) && openFormatUrlOk(openFormatUrl)) {
+        String openFormatHowruUrl = getOpenFormatHowruUrl(openFormatUrl).toString();
+        if (metaProxyUrlOk(metaProxyUrl)) {
             return Response.ok(new HowRuResponse(null)).build();
         }
         return Response.serverError().build();
