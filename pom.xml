@@ -72,11 +72,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <arguments>
-                        <argument>-Xequals</argument>
-                        <argument>-XtoString</argument>
-                        <argument>-XhashCode</argument>
-                    </arguments>
                     <xjbSources>
                         <xjbSource>src/main/xsd/bindings.xjb</xjbSource>
                     </xjbSources>
@@ -98,11 +93,6 @@
                         <version>4.0.2</version>
                     </dependency>
                     <dependency>
-                        <groupId>jakarta.activation</groupId>
-                        <artifactId>jakarta.activation-api</artifactId>
-                        <version>2.1.1</version>
-                    </dependency>
-                    <dependency>
                         <groupId>jakarta.xml.bind</groupId>
                         <artifactId>jakarta.xml.bind-api</artifactId>
                         <version>4.0.0</version>
@@ -111,12 +101,6 @@
                         <groupId>com.sun.xml.bind</groupId>
                         <artifactId>jaxb-impl</artifactId>
                         <version>4.0.2</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>org.patrodyne.jvnet</groupId>
-                        <artifactId>hisrc-basicjaxb-plugins</artifactId>
-                        <version>2.1.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.slf4j</groupId>
@@ -228,17 +212,6 @@
             <artifactId>jakarta.jakartaee-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>jakarta.xml.ws</groupId>
-            <artifactId>jakarta.xml.ws-api</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.microprofile.health</groupId>
             <artifactId>microprofile-health-api</artifactId>
         </dependency>
@@ -253,6 +226,7 @@
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -264,12 +238,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.patrodyne.jvnet</groupId>
-            <artifactId>hisrc-basicjaxb-runtime</artifactId>
-            <version>2.1.0</version>
         </dependency>
 
         <dependency>
