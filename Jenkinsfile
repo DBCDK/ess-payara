@@ -6,10 +6,6 @@ def DOCKER_PUSH_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 pipeline {
     agent { label workerNode }
-    tools {
-        maven "Maven 3"
-        jdk "jdk11"
-    }
 
     environment {
         GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
