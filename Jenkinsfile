@@ -122,7 +122,7 @@ pipeline {
         }
 
         success {
-            step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
+            step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])
         }
     }
 }
