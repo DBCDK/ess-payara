@@ -1,4 +1,5 @@
 docker.out
+.java-version
 
 # Compiled class file
 *.class
