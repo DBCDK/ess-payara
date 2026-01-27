@@ -39,7 +39,7 @@ pipeline {
                         mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
                     """
                         status += sh returnStatus: true, script: """
-                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo verify
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo --no-transfer-progress verify
                     """
                         def sonarOptions = "-Dsonar.branch.name=$BRANCH_NAME"
                         if (env.BRANCH_NAME != 'master') {
