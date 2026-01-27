@@ -12,14 +12,18 @@
     <parent>
         <groupId>dk.dbc</groupId>
         <artifactId>microservice-pom</artifactId>
-        <version>java17-SNAPSHOT</version>
+        <version>java21-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>dk.dbc</groupId>
     <artifactId>ess-payara</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>21.1.0-SNAPSHOT</version>
     <packaging>war</packaging>
+
+    <properties>
+        <sonar.projectKey>${artifactId}</sonar.projectKey>
+    </properties>
 
     <build>
         <plugins>
@@ -116,31 +120,6 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>docker-payara-utils</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>dk.dbc</groupId>
-                                    <artifactId>payara-utils-runtime</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
-                                    <outputDirectory>${project.build.directory}/docker/</outputDirectory>
-                                    <destFileName>payara-utils-runtime.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
@@ -178,25 +157,6 @@
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <additionalparam>-Xdoclint:none</additionalparam>
                     <excludePackageNames>dk.dbc.openformat,dk.dbc.sru.*</excludePackageNames>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <configuration>
-                    <onlyAnalyze>dk.dbc.ess.*</onlyAnalyze>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <configuration>
-                    <excludeRoots>
-                        <excludeRoot>target/generated-sources/annotations</excludeRoot>
-                        <excludeRoot>target/generated-sources/jaxb</excludeRoot>
-                    </excludeRoots>
                 </configuration>
             </plugin>
 
@@ -265,7 +225,7 @@
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-testcontainers-postgres</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>3.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -281,7 +241,7 @@
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-httpclient</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>5.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -294,7 +254,7 @@
         <dependency>
             <groupId>dk.dbc.xmldiff</groupId>
             <artifactId>xmldiff-core</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -322,12 +282,5 @@
             <artifactId>jersey-hk2</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-annotations</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
-
 </project>

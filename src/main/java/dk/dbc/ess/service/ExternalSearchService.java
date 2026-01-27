@@ -27,16 +27,6 @@ import dk.dbc.sru.sruresponse.Record;
 import dk.dbc.sru.sruresponse.RecordXMLEscapingDefinition;
 import dk.dbc.sru.sruresponse.Records;
 import dk.dbc.sru.sruresponse.SearchRetrieveResponse;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.eclipse.microprofile.metrics.Counter;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.annotation.Timed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -49,6 +39,15 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -184,7 +183,6 @@ public class ExternalSearchService {
         return serverError("Internal Server Error");
     }
 
-    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     Response buildResponse(SearchRetrieveResponse sru, String outputFormat, String idPrefix, String trackingId,
                            Usage usage)
         throws InterruptedException, ExecutionException {

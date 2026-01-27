@@ -2,6 +2,7 @@ package dk.dbc.ess.service;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import dk.dbc.commons.testcontainers.postgres.DBCPostgreSQLContainer;
+import dk.dbc.commons.useragent.UserAgent;
 import dk.dbc.ess.service.usage.Usage;
 import dk.dbc.httpclient.HttpClient;
 import org.slf4j.Logger;
@@ -41,13 +42,15 @@ public abstract class ContainerTestBase {
     static final String serviceBaseUrl;
     static final HttpClient httpClient;
 
+    static final UserAgent USER_AGENT = new UserAgent(ContainerTestBase.class.getSimpleName());
+
     static {
         wireMockServer = startWiremockServer();
         essDbContainer = startEssDbContainer();
         serviceContainer = startServiceContainer();
         serviceBaseUrl = String.format("http://%s:%d", serviceContainer.getHost(),
                 serviceContainer.getMappedPort(8080));
-        httpClient = HttpClient.create(HttpClient.newClient());
+        httpClient = HttpClient.create(HttpClient.newClient(), USER_AGENT);
     }
 
     static Connection getEssDbConnection() {
