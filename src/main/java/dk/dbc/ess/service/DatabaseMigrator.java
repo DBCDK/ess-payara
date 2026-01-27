@@ -1,16 +1,15 @@
 package dk.dbc.ess.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.MigrationInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJBException;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,7 +30,6 @@ public class DatabaseMigrator {
 
     public DatabaseMigrator() {}
 
-    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public DatabaseMigrator(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -54,7 +52,6 @@ public class DatabaseMigrator {
         flyway.migrate();
     }
 
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     private boolean isDatabaseAccessReadOnly() {
         try (Connection connection = dataSource.getConnection()) {
             return connection.isReadOnly();

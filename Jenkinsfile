@@ -1,19 +1,12 @@
 #!groovy
-def workerNode = 'devel11'
+def workerNode = 'devel12'
 def teamEmail = 'de-team@dbc.dk'
 def teamSlack = 'de-notifications'
-def DOCKER_PUSH_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 pipeline {
     agent { label workerNode }
 
-    environment {
-        GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
-    }
-
     triggers {
-        pollSCM("H/3 * * * *")
-        // This project uses the docker.dbc.dk/payara5-micro container
         upstream('/Docker-payara6-bump-trigger')
     }
 
@@ -38,47 +31,54 @@ pipeline {
 
         stage("Build & Push") {
             steps {
-                script {
-                    def status = sh returnStatus: true, script: """
+                withSonarQubeEnv(installationName: 'sonarqube.dbc.dk') {
+                    script {
+                        def status = sh returnStatus: true, script: """
                         rm -rf \$WORKSPACE/.repo
                         mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo dependency:resolve dependency:resolve-plugins >/dev/null
                         mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
                     """
-
-                    // We want code-coverage and pmd/spotbugs even if unittests fails
-                    status += sh returnStatus: true, script: """
-                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo verify pmd:pmd pmd:cpd spotbugs:spotbugs javadoc:aggregate
+                        status += sh returnStatus: true, script: """
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo verify
                     """
+                        def sonarOptions = "-Dsonar.branch.name=$BRANCH_NAME"
+                        if (env.BRANCH_NAME != 'master') {
+                            sonarOptions += " -Dsonar.newCode.referenceBranch=master"
+                        }
+                        status += sh returnStatus: true, script: """
+                        mvn -B -Dmaven.repo.local=$WORKSPACE/.repo --no-transfer-progress $sonarOptions sonar:sonar
+                    """
+                        junit testResults: '**/target/*-reports/*.xml'
 
-                    junit testResults: '**/target/*-reports/*.xml'
-
-                    def java = scanForIssues tool: [$class: 'Java']
-                    def javadoc = scanForIssues tool: [$class: 'JavaDoc']
-                    publishIssues issues: [java, javadoc], unstableTotalAll: 1
-
-                    def pmd = scanForIssues tool: [$class: 'Pmd']
-                    publishIssues issues: [pmd], unstableTotalAll: 1
-
-                    def spotbugs = scanForIssues tool: [$class: 'SpotBugs']
-                    publishIssues issues: [spotbugs], unstableTotalAll: 1
-
-                    if (status != 0) {
-                        error("Build failure")
-                    } else {
-                        docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:${DOCKER_PUSH_TAG}").push()
-                        if ("${env.BRANCH_NAME}" == 'master') {
-                            docker.image("docker-de.artifacts.dbccloud.dk/ess-payara-service-1.0:${DOCKER_PUSH_TAG}").push('latest')
+                        if (status != 0) {
+                            error("Build failure")
                         }
                     }
                 }
             }
         }
+        stage("quality gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage("docker push") {
+            steps {
+                script {
+                    def dockerImageName = readFile(file: 'docker.out')
+                    docker.image(dockerImageName).push()
+                }
+            }
+        }
+
     }
 
     post {
         fixed {
             script {
-                if ("${env.BRANCH_NAME}" == 'master') {
+                if (env.BRANCH_NAME == 'master') {
                     emailext(
                             recipientProviders: [developers(), culprits()],
                             to: teamEmail,
@@ -95,7 +95,7 @@ pipeline {
         }
         failure {
             script {
-                if ("${env.BRANCH_NAME}" == 'master') {
+                if (env.BRANCH_NAME == 'master') {
                     emailext(
                             recipientProviders: [developers(), culprits()],
                             to: teamEmail,
@@ -119,10 +119,6 @@ pipeline {
                     )
                 }
             }
-        }
-
-        success {
-            step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])
         }
     }
 }

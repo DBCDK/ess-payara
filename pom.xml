@@ -21,6 +21,10 @@
     <version>21.1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
+    <properties>
+        <sonar.projectKey>${artifactId}</sonar.projectKey>
+    </properties>
+
     <build>
         <plugins>
 
@@ -278,12 +282,5 @@
             <artifactId>jersey-hk2</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-annotations</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
-
 </project>
