@@ -1,4 +1,7 @@
 #!groovy
+
+@Library('dependency-track')
+
 def workerNode = 'devel12'
 def teamEmail = 'de-team@dbc.dk'
 def teamSlack = 'de-notifications'
@@ -61,6 +64,17 @@ pipeline {
             steps {
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage("supply-chain gate") {
+            steps {
+                script {
+                    dependencyTrackGate(
+                        projectBom:  'target/sbom-java.json',
+                        projectTeam: 'de-team',
+                        projectType: 'java'
+                    )
                 }
             }
         }
